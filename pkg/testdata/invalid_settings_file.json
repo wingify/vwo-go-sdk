@@ -1,0 +1,30 @@
+{
+  "sdkKey": 123456789,
+  "campaigns": [{
+    "goals": [{
+      "identifier": "GOAL_2",
+      "id": 213,
+      "type": "CUSTOM_GOAL"
+    }],
+    "variations": [{
+        "id": 1,
+        "name": "Control",
+        "changes": {},
+        "weight": 50
+      },
+      {
+        "id": 2,
+        "name": "Variation-1",
+        "changes": {},
+        "weight": 50
+      }
+    ],
+    "id": 230,
+    "percentTraffic": 50,
+    "key": "AB_T_50_W_50_50",
+    "status": "RUNNING",
+    "type": "VISUAL_AB"
+  }],
+  "accountId": 88888888,
+  "version": "99"
+}
