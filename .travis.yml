@@ -1,0 +1,14 @@
+language: go
+go:
+  - 1.11.1
+  - 1.11    # minimum supported version
+  - 1.11.13 # last series version
+  - 1.12.17 # last series version
+  - 1.13.12 # last series version
+  - 1.14.4  # latest version
+before_install:
+  - go get -t -v ./...
+script:
+  - ./test.sh
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
