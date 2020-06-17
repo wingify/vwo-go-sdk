@@ -29,13 +29,13 @@ import "github.com/wingify/vwo-go-sdk/pkg/api"
 settingsFile := vwo.GetSettingsFile("accountID", "SDKKey")
 
 // Default instance of VwoInstance
-instance, err := vwo.Launch(settingsFile)
+vwoClientInstance, err := vwo.Launch(settingsFile)
 if err != nil {
 	//handle err
 }
 
 // Instance with custom options
-instance, err := vwo.Launch(settingsFile, api.WithDevelopmentMode())
+vwoClientInstance, err := vwo.Launch(settingsFile, api.WithDevelopmentMode())
 if err != nil {
 	//handle err
 }
@@ -46,62 +46,62 @@ options := make(map[string]interface{})
 options["customVariables"] = map[string]interface{}{"a": "x"}
 options["variationTargetingVariables"] = map[string]interface{}{"a": "x"}
 options["revenueValue"] = 12
-variationName = vwoInstance.Activate(campaignKey, userID, options)
+variationName = vwoClientInstance.Activate(campaignKey, userID, options)
 
 // Without Custom Variables
-variationName = vwoInstance.Activate(campaignKey, userID, nil)
+variationName = vwoClientInstance.Activate(campaignKey, userID, nil)
 
 
 // GetVariation
 // With Custom Variables
 options := make(map[string]interface{})
 options["customVariables"] = map[string]interface{}{"a": "x"}
-variationName = vwoInstance.GetVariationName(campaignKey, userID, options)
+variationName = vwoClientInstance.GetVariationName(campaignKey, userID, options)
 
 //Without Custom Variables
-variationName = vwoInstance.GetVariationName(campaignKey, userID, nil)
+variationName = vwoClientInstance.GetVariationName(campaignKey, userID, nil)
 
 
 // Track API
 // With Custom Variables
 options := make(map[string]interface{})
 options["customVariables"] = map[string]interface{}{"a": "x"}
-isSuccessful = vwoInstance.Track(campaignKey, userID, goalIdentifier, options)
+isSuccessful = vwoClientInstance.Track(campaignKey, userID, goalIdentifier, options)
 
 // With Revenue Value
 options := make(map[string]interface{})
 options["revenueValue"] = 12
-isSuccessful = vwoInstance.Track(campaignKey, userID, goalIdentifier, options)
+isSuccessful = vwoClientInstance.Track(campaignKey, userID, goalIdentifier, options)
 
 // With both Custom Variables and Revenue Value
 options := make(map[string]interface{})
 options["customVariables"] = map[string]interface{}{"a": "x"}
 options["revenueValue"] = 12
-isSuccessful = vwoInstance.Track(campaignKey, userID, goalIdentifier, options)
+isSuccessful = vwoClientInstance.Track(campaignKey, userID, goalIdentifier, options)
 
 //Without Custom Variables
-isSuccessful = vwoInstance.Track(campaignKey, userID, goalIdentifier, nil)
+isSuccessful = vwoClientInstance.Track(campaignKey, userID, goalIdentifier, nil)
 
 // FeatureEnabled API
 // With Custom Varibles
 options := make(map[string]interface{})
 options["customVariables"] = map[string]interface{}{"a": "x"}
-isSuccessful = vwoInstance.IsFeatureEnabled(campaignKey, userID, options)
+isSuccessful = vwoClientInstance.IsFeatureEnabled(campaignKey, userID, options)
 
 // Without Custom Variables
-isSuccessful = vwoInstance.IsFeatureEnabled(campaignKey, userID, nil)
+isSuccessful = vwoClientInstance.IsFeatureEnabled(campaignKey, userID, nil)
 
 // GetFeatureVariableValue API
 // With Custom Variables
 options := make(map[string]interface{})
 options["customVariables"] = map[string]interface{}{"a": "x"}
-variableValue = vwoInstance.GetFeatureVariableValue(campaignKey, variableKey, userID, options)
+variableValue = vwoClientInstance.GetFeatureVariableValue(campaignKey, variableKey, userID, options)
 
 // Without Custom Variables
-variableValue = vwoInstance.GetFeatureVariableValue(campaignKey, variableKey, userID, nil)
+variableValue = vwoClientInstance.GetFeatureVariableValue(campaignKey, variableKey, userID, nil)
 
 // Push API
-isSuccessful = vwoInstance.Push(tagKey, tagValue, userID)
+isSuccessful = vwoClientInstance.Push(tagKey, tagValue, userID)
 ```
 
 **User Storage**
@@ -173,7 +173,7 @@ func main() {
 	// create UserStorageData object
 	storage := &UserStorageData{}
 
-	instance, err := vwo.Launch(settingsFile, api.WithStorage(storage))
+	vwoClientInstance, err := vwo.Launch(settingsFile, api.WithStorage(storage))
 	if err != nil {
 		//handle err
 	}
@@ -203,7 +203,7 @@ func main() {
 	// create LogS object
 	logger := &LogS{}
 
-	instance, err := vwo.Launch(settingsFile, api.WithLogger(logger))
+	vwoClientInstance, err := vwo.Launch(settingsFile, api.WithLogger(logger))
 	if err != nil {
 		//handle err
 	}
