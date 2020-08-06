@@ -93,6 +93,65 @@ func GetCampaign(API string, settingsFile schema.SettingsFile, campaignKey strin
 	return schema.Campaign{}, fmt.Errorf(constants.ErrorMessageCampaignNotFound, API, campaignKey, "")
 }
 
+// GetCampaignForKeys function returns list of campaigns from the settings file that are in the list of CampaignKeys
+func GetCampaignForKeys(vwoInstance schema.VwoInstance, campaignKeys []string) ([]schema.Campaign, error){
+	/*
+		Args:
+			settingsFile  : Settings file for the project
+			campaignKeys: Array of campaign keys to be searched
+
+		Returns:
+			[]schema.Campaign: Array of matching campaigns 
+	*/
+
+	var Campaigns []schema.Campaign
+	for _, campaignKey := range campaignKeys {
+		Campaign, err := GetCampaign(vwoInstance.API, vwoInstance.SettingsFile, campaignKey)
+		if err != nil {
+			LogMessage(vwoInstance.Logger, constants.Error, campaign, err.Error())
+		} else {
+			Campaigns = append(Campaigns, Campaign)
+		}
+	}
+
+	if len(Campaigns) == 0 {
+		return Campaigns, fmt.Errorf(constants.ErrorMessageNoCampaignInCampaignList, vwoInstance.API, campaignKeys, "")
+	}
+	return Campaigns, nil
+}
+
+// GetCampaignForGoals function returns list of campaigns from the settings file that are in the list of CampaignKeys
+func GetCampaignForGoals(vwoInstance schema.VwoInstance, goalIdentifier, goalTypeToTrack string) ([]schema.Campaign, error){
+	/*
+		Args:
+			settingsFile  : Settings file for the project
+			goalidentifier : Goal to be searched in the campaigns
+			goalTypeToTrack : Type the searched goal should be 
+
+		Returns:
+			[]schema.Campaign: Array of matching campaigns 
+	*/
+
+	var Campaigns []schema.Campaign
+	for _, Campaign := range vwoInstance.SettingsFile.Campaigns {
+		goal, err := GetCampaignGoal(vwoInstance.API, Campaign, goalIdentifier)
+		if err != nil {
+			LogMessage(vwoInstance.Logger, constants.Error, campaign, err.Error())
+		} else {
+			if goal.Type == goalTypeToTrack || goalTypeToTrack == constants.GoalTypeAll {
+				Campaigns = append(Campaigns, Campaign)
+			}
+		}
+	}
+	
+	if len(Campaigns) == 0 {
+		return Campaigns, fmt.Errorf(constants.ErrorMessageNoCampaignInCampaignList, vwoInstance.API, goalIdentifier, goalTypeToTrack)
+	}
+	return Campaigns, nil
+}
+
+
+
 // ScaleVariations function It extracts the weights from all the variations inside the
 // campaign and scales them so that the total sum of eligible variations weights become 100%
 func ScaleVariations(variations []schema.Variation) []schema.Variation {
@@ -157,6 +216,7 @@ func GetCampaignVariation(API string, campaign schema.Campaign, variationName st
 			return variation, nil
 		}
 	}
+
 	return schema.Variation{}, fmt.Errorf(constants.ErrorMessageVariationNotFound, API, variationName, campaign.Key)
 }
 

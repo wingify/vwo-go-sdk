@@ -91,3 +91,11 @@ func WithDevelopmentMode() VWOOption {
 		vwo.IsDevelopmentMode = true
 	}
 }
+
+// WithGoalAttributes sets GoalTypeToTrack to the passed type and ShouldTrackReturningUser to false
+func WithGoalAttributes(goalTypeToTrack interface{}, shouldTrackReturningUser interface{}) VWOOption {
+	return func(vwo *VWOInstance) {
+		vwo.GoalTypeToTrack = goalTypeToTrack
+		vwo.ShouldTrackReturningUser = shouldTrackReturningUser
+	}
+}

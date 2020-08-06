@@ -18,13 +18,15 @@ package schema
 
 // VwoInstance struct utils
 type VwoInstance struct {
-	SettingsFile      SettingsFile
-	UserStorage       interface{}
-	Logger            interface{}
-	IsDevelopmentMode bool
-	UserID            string
-	Campaign          Campaign
-	API               string
+	SettingsFile             SettingsFile
+	UserStorage              interface{}
+	Logger                   interface{}
+	IsDevelopmentMode        bool
+	UserID                   string
+	Campaign                 Campaign
+	API                      string
+	GoalTypeToTrack          interface{}
+	ShouldTrackReturningUser interface{}
 }
 
 // SettingsFile struct
@@ -83,13 +85,16 @@ type Options struct {
 	CustomVariables             map[string]interface{} `json:"customVariables"`
 	VariationTargetingVariables map[string]interface{} `json:"variationTargetingVariables"`
 	RevenueValue                interface{}
+	GoalTypeToTrack             interface{}
+	ShouldTrackReturningUser    interface{}
 }
 
 // UserData  struct
 type UserData struct {
-	UserID        string
-	CampaignKey   string
-	VariationName string
+	UserID         string
+	CampaignKey    string
+	VariationName  string
+	GoalIdentifier string
 }
 
 // VariationAllocationRange struct
@@ -115,4 +120,10 @@ type Impression struct {
 	GoalID       int     `json:"goal_id"`
 	R            string  `json:"r"`
 	Tags         string  `json:"tags"`
+}
+
+// TrackResult struct
+type TrackResult struct {
+	CampaignKey string
+	TrackValue bool
 }

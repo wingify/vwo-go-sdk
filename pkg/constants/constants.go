@@ -21,7 +21,7 @@ const (
 	MaxTrafficPercent = 100
 	MaxTrafficValue   = 10000
 	StatusRunning     = "RUNNING"
-	SDKVersion        = "1.0.0"
+	SDKVersion        = "1.8.0"
 	SDKName           = "vwo-go-sdk"
 	Platform          = "server"
 	SeedValue         = 1
@@ -32,6 +32,8 @@ const (
 
 	GoalTypeRevenue = "REVENUE_TRACKING"
 	GoalTypeCustom  = "CUSTOM_GOAL"
+	GoalTypeAll 		= "ALL"
+	GoalIdentifierSeperator = "_vwo_"
 
 	PushAPITagValueLength = 255
 	PushAPITagKeyLength   = 255

@@ -17,6 +17,9 @@
 package utils
 
 import (
+	"fmt"
+
+	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 )
@@ -26,6 +29,8 @@ func ParseOptions(option interface{}) (options schema.Options) {
 	if option == nil {
 		options.CustomVariables = make(map[string]interface{})
 		options.VariationTargetingVariables = make(map[string]interface{})
+		options.GoalTypeToTrack = nil
+		options.ShouldTrackReturningUser = nil
 		return
 	}
 	optionMap, okMap := option.(map[string]interface{})
@@ -34,13 +39,25 @@ func ParseOptions(option interface{}) (options schema.Options) {
 		if okCustomVariables {
 			options.CustomVariables = customVariables.(map[string]interface{})
 		}
+
 		variationTargetingVariables, okVariationTargetingVariables := optionMap["variationTargetingVariables"]
 		if okVariationTargetingVariables {
 			options.VariationTargetingVariables = variationTargetingVariables.(map[string]interface{})
 		}
+
 		revenueValue, okRevenueValue := optionMap["revenueValue"]
 		if okRevenueValue {
 			options.RevenueValue = revenueValue
+		}
+
+		goalTypeToTrack, okGoalTypeToTrack := optionMap["goalTypeToTrack"]
+		if okGoalTypeToTrack {
+			options.GoalTypeToTrack = goalTypeToTrack
+		}
+
+		shouldTrackReturningUser, okShouldTrackReturningUser := optionMap["shouldTrackReturningUser"]
+		if okShouldTrackReturningUser {
+			options.ShouldTrackReturningUser = shouldTrackReturningUser
 		}
 	}
 	return
@@ -113,9 +130,42 @@ func ValidatePush(tagKey, tagValue, userID string) bool {
 }
 
 // ValidateTrack - validates Track API parameters
-func ValidateTrack(campaignKey, userID, goalIdentifier string) bool {
-	if campaignKey == "" || userID == "" || goalIdentifier == "" {
-		return false
+func ValidateTrack(userID, goalIdentifier string, goalTypeToTrack interface{}, shouldTrackReturningUser interface{}) (bool, string) {
+	if userID == "" {
+		message := fmt.Sprintf(constants.ErrorMessageTrackAPIEmptyParam, "User ID")
+		return false, message
 	}
-	return true
+
+	if goalIdentifier == "" {
+		message := fmt.Sprintf(constants.ErrorMessageTrackAPIEmptyParam, "Goal Identifier")
+		return false, message
+	}
+
+	if goalTypeToTrack != nil {
+		switch Val := goalTypeToTrack.(type) {
+		case string:
+			if !(Val == constants.GoalTypeRevenue || Val == constants.GoalTypeCustom || Val == constants.GoalTypeAll) {
+				message := fmt.Sprintf(constants.ErrorMessageTrackAPIIncorrectGoalTypeToTrack, Val)
+				return false, message
+			}
+		default:
+			message := fmt.Sprintf(constants.ErrorMessageTrackAPIIncorrectParamType, "GoalTypeTotrack")
+			return false, message
+		}
+	}
+
+	if shouldTrackReturningUser != nil {
+		switch Val := shouldTrackReturningUser.(type) {
+		case bool:
+			if !(Val == true || Val == false) {
+				message := fmt.Sprintf(constants.ErrorMessageTrackAPIIncorrectShouldTrackReturningUser, Val)
+				return false, message
+			}
+		default:
+			message := fmt.Sprintf(constants.ErrorMessageTrackAPIIncorrectParamType, "ShouldTrackReturningUser")
+			return false, message
+		}
+	}
+
+	return true, ""
 }

@@ -29,7 +29,7 @@ import (
 // UserStorage interface
 type UserStorage interface {
 	Get(userID, campaignKey string) schema.UserData
-	Set(userID, campaignKey, variationName string)
+	Set(userID, campaignKey, variationName, GoalIdentifier string)
 }
 
 // IncorrectUserStorage interface
@@ -47,16 +47,30 @@ type IncorrectUserStorageData struct{}
 // data is an example of how data is stored
 var data = `{
     "AB_T_50_W_50_50": [{
-            "UserID": "DummyUser",
-            "CampaignKey": "AB_T_50_W_50_50",
-            "VariationName": "DummyVariation"
-        },
-        {
-            "UserID": "TempUser",
-            "CampaignKey": "AB_T_50_W_50_50",
-            "VariationName": "Control"
-        }
-    ]
+			"UserID": "DummyUser",
+			"CampaignKey": "AB_T_50_W_50_50",
+			"VariationName": "DummyVariation",
+			"GoalIdentifier": "DummyGoal"
+		},
+		{
+			"UserID": "TempUser",
+			"CampaignKey": "AB_T_50_W_50_50",
+			"VariationName": "Control",
+			"GoalIdentifier": "DummyGoal"
+		}],
+
+		"AB_T_100_W_33_33_33": [{
+			"UserID": "DummyUser",
+			"CampaignKey": "AB_T_100_W_33_33_33",
+			"VariationName": "Control",
+			"GoalIdentifier": "DummyGoal_vwo_GOAL_2"
+		},
+		{
+			"UserID": "TempUser",
+			"CampaignKey": "AB_T_100_W_33_33_33",
+			"VariationName": "Control",
+			"GoalIdentifier": "DummyGoal_vwo_GOAL_1"
+		}]
 }`
 
 // Get function is used to get the data from user storage
@@ -81,8 +95,30 @@ func (us *UserStorageData) Get(userID, campaignKey string) schema.UserData {
 	return schema.UserData{}
 }
 
+// Get function is used to get the data from user storage
+func (us *IncorrectUserStorageData) Get(userID, campaignKey string) schema.UserData {
+	var userDatas map[string][]schema.UserData
+	// Conect your database here to fetch the current data
+	// Uncomment the below part to user JSON as data base
+	if err := json.Unmarshal([]byte(data), &userDatas); err != nil {
+		fmt.Print("Could not unmarshall")
+	}
+	if len(userDatas) == 0 {
+		return schema.UserData{}
+	}
+	userData, ok := userDatas[campaignKey]
+	if ok {
+		for _, userdata := range userData {
+			if userdata.UserID == userID {
+				return userdata
+			}
+		}
+	}
+	return schema.UserData{}
+}
+
 // Set function
-func (us *UserStorageData) Set(userID, campaignKey, variationName string) {
+func (us *UserStorageData) Set(userID, campaignKey, variationName, GoalIdentifier string) {
 }
 
 // IncorrectSet function

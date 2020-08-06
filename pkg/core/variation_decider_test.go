@@ -124,6 +124,8 @@ func TestGetVariation(t *testing.T) {
 		Logger: logs,
 	}
 
+	goalIdentifier := ""
+
 	for settingsFileName, settingsFile := range settingsFiles {
 		vwoInstance := schema.VwoInstance{
 			Logger: logs,
@@ -136,7 +138,7 @@ func TestGetVariation(t *testing.T) {
 		for i := range testCases {
 			campaign, err := utils.GetCampaign("", instance.SettingsFile, settingsFile.Campaigns[0].Key)
 			assertOutput.Nil(err, "Incorrect Get Campaign Call")
-			actual, _ := GetVariation(instance, testCases[i].User, campaign, schema.Options{})
+			actual, _, _ := GetVariation(instance, testCases[i].User, campaign, goalIdentifier, schema.Options{})
 			expected := testCases[i].Variation
 			assertOutput.Equal(expected, actual.Name, settingsFileName+" "+testCases[i].User)
 		}
@@ -161,39 +163,49 @@ func TestGetVariation(t *testing.T) {
 	options := schema.Options{
 		VariationTargetingVariables: map[string]interface{}{"a": "123"},
 	}
-	actual, _ := GetVariation(instance, testdata.ValidUser, campaign, options)
+
+	actual, storedGoalIdentifier, err := GetVariation(instance, testdata.ValidUser, campaign, goalIdentifier, options)
+	assertOutput.Nil(err, "No Variation Will Be Allcoated")
 	expected := testdata.ValidVariationControl
+	assert.Empty(t, storedGoalIdentifier, "No Stored variation")
 	assertOutput.Equal(expected, actual.Name, "Variations should match")
 
 	options = schema.Options{
 		VariationTargetingVariables: map[string]interface{}{"b": "456"},
 	}
-	actual, _ = GetVariation(instance, testdata.ValidUser, campaign, options)
+	actual, storedGoalIdentifier, err = GetVariation(instance, testdata.ValidUser, campaign, goalIdentifier, options)
+	assertOutput.Nil(err, "No Variation Will Be Allcoated")
 	expected = testdata.ValidVariationVariation2
+	assert.Empty(t, storedGoalIdentifier, "No Stored variation")
 	assertOutput.Equal(expected, actual.Name, "Variations should match")
 
 	instance = testdata.GetInstanceWithStorage("AB_T_50_W_50_50")
-	actual, _ = GetVariation(instance, testdata.TempUser, instance.SettingsFile.Campaigns[0], schema.Options{})
+	actual, storedGoalIdentifier, err = GetVariation(instance, testdata.TempUser, instance.SettingsFile.Campaigns[0], goalIdentifier, schema.Options{})
+	assertOutput.Nil(err, "No Variation Will Be Allcoated")
 	expected = instance.SettingsFile.Campaigns[0].Variations[0].Name
+	assert.Equal(t, testdata.DummyGoal, storedGoalIdentifier, "No Stored variation")
 	assertOutput.Equal(expected, actual.Name, "Variations should match")
 
 	instance = testdata.GetInstanceWithStorage("AB_T_100_W_20_80")
 	userID := testdata.GetRandomUser()
-	actual, err = GetVariation(instance, userID, instance.SettingsFile.Campaigns[0], schema.Options{})
+	actual, storedGoalIdentifier, err = GetVariation(instance, userID, instance.SettingsFile.Campaigns[0], goalIdentifier, schema.Options{})
 	assertOutput.NotNil(err, "No Variation Will Be Allcoated")
+	assert.Empty(t, storedGoalIdentifier, "No Stored variation")
 	assertOutput.Empty(actual, "Variations should be empty : "+userID)
 
 	instance.SettingsFile.Campaigns[0].Variations = utils.GetVariationAllocationRanges(instance, instance.SettingsFile.Campaigns[0].Variations)
 	userID = testdata.GetRandomUser()
-	actual, err = GetVariation(instance, userID, instance.SettingsFile.Campaigns[0], schema.Options{})
+	actual, storedGoalIdentifier, err = GetVariation(instance, userID, instance.SettingsFile.Campaigns[0], goalIdentifier, schema.Options{})
 	assertOutput.Equal(nil, err, "No error expected")
+	assert.Empty(t, storedGoalIdentifier, "No Stored variation")
 	assertOutput.NotEmpty(actual, "Variations should match : "+userID)
 
 	instance = testdata.GetInstanceWithIncorrectStorage("AB_T_100_W_20_80")
 	instance.SettingsFile.Campaigns[0].Variations = utils.GetVariationAllocationRanges(instance, instance.SettingsFile.Campaigns[0].Variations)
 	userID = testdata.GetRandomUser()
-	actual, err = GetVariation(instance, userID, instance.SettingsFile.Campaigns[0], schema.Options{})
+	actual, storedGoalIdentifier, err = GetVariation(instance, userID, instance.SettingsFile.Campaigns[0], goalIdentifier, schema.Options{})
 	assertOutput.Equal(nil, err, "No error expected")
+	assert.Empty(t, storedGoalIdentifier, "No Stored variation")
 	assertOutput.NotEmpty(actual, "Variations should match : "+userID)
 }
 
@@ -203,7 +215,7 @@ func TestGetVariationFromUserStorage(t *testing.T) {
 
 	campaign := vwoInstance.SettingsFile.Campaigns[0]
 	userID := testdata.ValidUser
-	actual := GetVariationFromUserStorage(vwoInstance, userID, campaign)
+	actual, storedGoalIdentifier := GetVariationFromUserStorage(vwoInstance, userID, campaign)
 	assertOutput.Empty(actual, "Actual and Expected Variation Name mismatch")
 
 	vwoInstance = testdata.GetInstanceWithStorage("AB_T_50_W_50_50")
@@ -211,13 +223,15 @@ func TestGetVariationFromUserStorage(t *testing.T) {
 	campaign = vwoInstance.SettingsFile.Campaigns[0]
 	userID = testdata.ValidUser
 	expected := testdata.DummyVariation
-	actual = GetVariationFromUserStorage(vwoInstance, userID, campaign)
+	actual, storedGoalIdentifier = GetVariationFromUserStorage(vwoInstance, userID, campaign)
+	assertOutput.Equal(testdata.DummyGoal, storedGoalIdentifier, "Actual and Expected goalIdentifier did not match")
 	assertOutput.Equal(expected, actual, "Actual and Expected Variation Name mismatch")
 
 	campaign = vwoInstance.SettingsFile.Campaigns[0]
 	userID = testdata.InvalidUser
 	expected = ""
-	actual = GetVariationFromUserStorage(vwoInstance, userID, campaign)
+	actual, storedGoalIdentifier = GetVariationFromUserStorage(vwoInstance, userID, campaign)
+	assertOutput.Equal(storedGoalIdentifier, "", "Actual and Expected goalIdentifier did not match")
 	assertOutput.Equal(expected, actual, "Actual and Expected Variation Name mismatch")
 
 }

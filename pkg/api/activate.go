@@ -88,7 +88,7 @@ func (vwo *VWOInstance) Activate(campaignKey, userID string, option interface{})
 
 	vwoInstance.Campaign = campaign
 
-	variation, err := core.GetVariation(vwoInstance, userID, campaign, options)
+	variation, _, err := core.GetVariation(vwoInstance, userID, campaign, "", options)
 	if err != nil {
 		message := fmt.Sprintf(constants.InfoMessageInvalidVariationKey+" \n", vwoInstance.API, userID, campaignKey, err.Error())
 		utils.LogMessage(vwo.Logger, constants.Info, activate, message)

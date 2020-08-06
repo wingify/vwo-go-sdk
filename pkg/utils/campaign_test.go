@@ -19,6 +19,7 @@ package utils
 import (
 	"testing"
 
+	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/testdata"
 	"github.com/stretchr/testify/assert"
@@ -138,6 +139,44 @@ func TestGetVariationAllocationRanges(t *testing.T) {
 	assert.Equal(t, -1, variations[0].EndVariationAllocation, "End Allocation range failed to match")
 	assert.Equal(t, 1, variations[1].StartVariationAllocation, "Start Allocation range failed to match")
 	assert.Equal(t, 10000, variations[1].EndVariationAllocation, "End Allocation range failed to match")
+}
+
+func TestGetCampaignForKeys(t *testing.T) {
+	vwoInstance := testdata.GetInstanceWithSettings("NEW_SETTINGS_FILE")
+
+	campaignKeys := []string{"FEATURE_ROLLOUT_KEY", "FEATURE_TEST", "NEW_RECOMMENDATION_AB_CAMPAIGN"}
+	campaigns, err := GetCampaignForKeys(vwoInstance, campaignKeys)
+	assert.Nil(t, err, "Encountered Error")
+	assert.Equal(t, vwoInstance.SettingsFile.Campaigns, campaigns, "List of campaigns did not match")
+
+	campaignKeys = []string{"FEATURE_ROLLOUT_KEY", "FEATURE_TEST_NT_EXIST"}
+	campaigns, err = GetCampaignForKeys(vwoInstance, campaignKeys)
+	assert.Nil(t, err, "Encountered Error")
+	var expected []schema.Campaign
+	expected = append(expected, vwoInstance.SettingsFile.Campaigns[0])
+	assert.Equal(t, expected, campaigns, "List of campaigns did not match")
+
+	campaignKeys = []string{"FEATURE_TEST_NT_EXIST"}
+	campaigns, err = GetCampaignForKeys(vwoInstance, campaignKeys)
+	assert.NotNil(t, err, "Encountered Error")
+	assert.Empty(t, campaigns, "List of campaigns did not match")
+}
+
+func TestGetCampaignForGoals(t *testing.T) {
+	vwoInstance := testdata.GetInstanceWithSettings("NEW_SETTINGS_FILE")
+
+	goalIdentifier := "FEATURE_TEST_GOAL"
+	goalTypeToTrack := "CUSTOM_GOAL"
+	campaigns, err := GetCampaignForGoals(vwoInstance, goalIdentifier, goalTypeToTrack)
+	assert.Nil(t, err, "Encountered Error")
+	expected := []schema.Campaign{vwoInstance.SettingsFile.Campaigns[1], vwoInstance.SettingsFile.Campaigns[2]}
+	assert.Equal(t, expected, campaigns, "List of campaigns did not match")
+
+	goalIdentifier = "FEATURE_TEST_GOAL"
+	goalTypeToTrack = "REVENUE_TRACKING"
+	campaigns, err = GetCampaignForGoals(vwoInstance, goalIdentifier, goalTypeToTrack)
+	assert.NotNil(t, err, "Encountered Error")
+	assert.Empty(t, campaigns, "List of campaigns did not match")
 }
 
 func TestMin(t *testing.T) {

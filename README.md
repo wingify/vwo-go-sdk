@@ -9,7 +9,7 @@ This open source library allows you to A/B Test your Website at server-side.
 
 ## Requirements
 
-- Works with Go 1.11 +
+- Works with Go 1.11.4+
 
 ## Installation
 
@@ -73,14 +73,23 @@ options := make(map[string]interface{})
 options["revenueValue"] = 12
 isSuccessful = vwoClientInstance.Track(campaignKey, userID, goalIdentifier, options)
 
-// With both Custom Variables and Revenue Value
+// With Custom Variables, Revenue Value, GoalTypeToTrack and ShouldTrackreturningUser
 options := make(map[string]interface{})
 options["customVariables"] = map[string]interface{}{"a": "x"}
 options["revenueValue"] = 12
-isSuccessful = vwoClientInstance.Track(campaignKey, userID, goalIdentifier, options)
+//  Set specific goalType to Track
+//  Available GoalTypes - constants.GoalTypeRevenue, constants.GoalTypeCustom, constants.GoalTypeAll (Default)
+options["goalTypeToTrack"] = constants.GoalTypeAll
+//  Set if a return user should be tracked, default false
+options["ShouldTrackreturningUser"] = false
+isSuccessful = vwoInstance.Track(campaignKey, userID, goalIdentifier, options)
 
-//Without Custom Variables
-isSuccessful = vwoClientInstance.Track(campaignKey, userID, goalIdentifier, nil)
+// For Goal Conversion in Multiple Campaign
+// campaignKeys = []string{"campaignKey1", "campaignKey2", "campaignKey3"}
+// For Goal Conversion in All Possible Campaigns
+// campaignKeys = nil
+isSuccessful = vwoInstance.Track(campaignKeys, userID, goalIdentifier, options)
+
 
 // FeatureEnabled API
 // With Custom Varibles
@@ -114,7 +123,7 @@ import "github.com/wingify/vwo-go-sdk/pkg/schema"
 // declare UserStorage interface with the following Get & Set function signature
 type UserStorage interface{
     Get(userID, campaignKey string) UserData
-    Set(string, string, string)
+    Set(string, string, string, string)
 }
 
 // declare a UserStorageData struct to implement UserStorage interface
@@ -134,22 +143,25 @@ func (us *UserStorageData) Get(userID, campaignKey string) schema.UserData {
     /*
     // UserData  struct
     type UserData struct {
-        UserID        string
-        CampaignKey   string
-        VariationName string
-    }
+		UserID         string
+		CampaignKey    string
+		VariationName  string
+		GoalIdentifier string
+	}
     */
 	return schema.UserData{}
 }
 
 // Set method to save user variation to storage
-func (us *UserStorageData) Set(userID, campaignKey, variationName string) {
+func (us *UserStorageData) Set(userID, campaignKey, variationName, goalIdentifer string) {
     //Example code showing how to store userData in DB
     userdata := schema.UserData{
 		UserID:        userID,
 		CampaignKey:   campaignKey,
 		VariationName: variationName,
+		GoalIdentifier: goalIdentifier,
 	}
+
 	flag := false
 	userData, ok := userDatas[userdata.CampaignKey]
 	if ok {
@@ -160,13 +172,19 @@ func (us *UserStorageData) Set(userID, campaignKey, variationName string) {
 		}
 		if !flag {
 			userDatas[userdata.CampaignKey] = append(userDatas[userdata.CampaignKey], userdata)
+		} else {
+			for i, user := range userData {
+				if user.UserID == userdata.UserID && user.CampaignKey == userdata.CampaignKey {
+					userData[i].VariationName = userdata.VariationName
+					userData[i].GoalIdentifier = userdata.GoalIdentifier
+				}
+			}
 		}
 	} else {
 		userDatas[userdata.CampaignKey] = []schema.UserData{
 			userdata,
 		}
 	}
-}
 
 func main() {
 	settingsFile := vwo.GetSettingsFile("accountID", "SDKKey")

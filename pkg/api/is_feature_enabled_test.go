@@ -64,34 +64,52 @@ func TestIsFeatureEnabled(t *testing.T) {
 			assertOutput.False(actual, "Wrong Campaign Type")
 		} else if instance.SettingsFile.Campaigns[0].Type == constants.CampaignTypeFeatureRollout && settingsFileName != "NEW_SETTINGS_FILE" {
 			userID := testdata.GetRandomUser()
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
 				actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[0].Key, userID, nil)
+
+				assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+				assertOutput.Nil(err, "Error encuntered")
 				assertOutput.True(actual, "Feature Rollout Campaign")
 			}
 		} else if instance.SettingsFile.Campaigns[0].Type == constants.CampaignTypeFeatureRollout && settingsFileName == "NEW_SETTINGS_FILE" {
 			userID := testdata.GetRandomUser()
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
 				actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[0].Key, userID, nil)
+
+				assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+				assertOutput.Nil(err, "Error encuntered")
 				assertOutput.True(actual, "Feature Rollout Campaign")
 			}
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[1], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[1], "", schema.Options{}); variation.Name != "" {
 				if variation.Name == "Control" {
 					actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[1].Key, userID, nil)
+
+					assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+					assertOutput.NotNil(err, "Error encuntered")
 					assertOutput.False(actual, "Feature Test Campaign")
 				} else {
 					actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[1].Key, userID, nil)
+
+					assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+					assertOutput.Nil(err, "Error encuntered")
 					assertOutput.True(actual, "Feature Test Campaign")
 				}
 			}
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[2], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[2], "", schema.Options{}); variation.Name != "" {
 				actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[2].Key, userID, nil)
+
+				assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+				assertOutput.NotNil(err, "Error encuntered")
 				assertOutput.False(actual, "Visual AB Campaign")
 			}
 		} else if instance.SettingsFile.Campaigns[0].Type == constants.CampaignTypeFeatureTest && settingsFileName != "FT_T_100_W_10_20_30_40_IFEF" {
 			userID := testdata.GetRandomUser()
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
 				if variation.Name == "Control" {
 					actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[0].Key, userID, nil)
+					
+					assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+					assertOutput.Nil(err, "Error encuntered")
 					assertOutput.False(actual, "Feature Test Campaign : " + variation.Name + userID)
 				} else {
 					actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[0].Key, userID, nil)
@@ -100,12 +118,18 @@ func TestIsFeatureEnabled(t *testing.T) {
 			}
 		} else if instance.SettingsFile.Campaigns[0].Type == constants.CampaignTypeFeatureTest && settingsFileName == "FT_T_100_W_10_20_30_40_IFEF" {
 			userID := testdata.GetRandomUser()
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
 				if variation.Name == "Variation-2" {
 					actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[0].Key, userID, nil)
+
+					assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+					assertOutput.Nil(err, "Error encuntered")
 					assertOutput.True(actual, "Feature Test Campaign : " + variation.Name + userID)
 				} else {
 					actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[0].Key, userID, nil)
+
+					assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+					assertOutput.Nil(err, "Error encuntered")
 					assertOutput.False(actual, "Feature Test Campaign : " + variation.Name + userID)
 				}
 			}

@@ -73,8 +73,11 @@ func TestGetFeatureVariableValue(t *testing.T) {
 
 		if instance.SettingsFile.Campaigns[0].Type == constants.CampaignTypeFeatureRollout && settingsFileName != "FR_WRONG_VARIABLE_TYPE" && settingsFileName != "NEW_SETTINGS_FILE" {
 			userID := testdata.GetFeatureDummyUser
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
 				testCases := userExpectation["ROLLOUT_VARIABLES"]
+
+				assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+				assertOutput.Nil(err, "Error encuntered")
 
 				actual := instance.GetFeatureVariableValue(instance.SettingsFile.Campaigns[0].Key, "STRING_VARIABLE", userID, nil)
 				assertOutput.Equal(testCases["STRING_VARIABLE"], actual.(string), settingsFileName + " : STRING_VARIABLE")
@@ -90,7 +93,10 @@ func TestGetFeatureVariableValue(t *testing.T) {
 			}
 		} else if instance.SettingsFile.Campaigns[0].Type == constants.CampaignTypeFeatureRollout && settingsFileName == "FR_WRONG_VARIABLE_TYPE" && settingsFileName != "NEW_SETTINGS_FILE" {
 			userID := testdata.GetFeatureDummyUser
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
+				assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+				assertOutput.Nil(err, "Error encuntered")
+				
 				actual := instance.GetFeatureVariableValue(instance.SettingsFile.Campaigns[0].Key, "STRING_VARIABLE", userID, nil)
 				assertOutput.Nil(actual, settingsFileName + " : STRING_VARIABLE")
 
@@ -137,8 +143,11 @@ func TestGetFeatureVariableValue(t *testing.T) {
 			}
 		} else if instance.SettingsFile.Campaigns[0].Type == constants.CampaignTypeFeatureRollout && settingsFileName != "FR_WRONG_VARIABLE_TYPE" && settingsFileName == "NEW_SETTINGS_FILE" {
 			userID := testdata.GetFeatureDummyUser
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
 				testCases := userExpectation["ROLLOUT_VARIABLES"]
+
+				assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+				assertOutput.Nil(err, "Error encuntered")
 
 				actual := instance.GetFeatureVariableValue(instance.SettingsFile.Campaigns[0].Key, "STRING_VARIABLE", userID, nil)
 				assertOutput.Equal("d1", actual.(string), settingsFileName + " : STRING_VARIABLE")
@@ -161,7 +170,10 @@ func TestGetFeatureVariableValue(t *testing.T) {
 			assertOutput.Nil(actual, "Wrong Campaign Type")
 		} else if instance.SettingsFile.Campaigns[0].Type == constants.CampaignTypeFeatureTest {
 				userID := testdata.GetFeatureDummyUser
-			if variation, _ := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], schema.Options{}); variation.Name != "" {
+			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
+				assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
+				assertOutput.Nil(err, "Error encuntered")
+				
 				actual := instance.GetFeatureVariableValue(instance.SettingsFile.Campaigns[0].Key, "STRING_VARIABLE", userID, nil)
 				expected := userExpectation["STRING_VARIABLE"][variation.Name]
 				assertOutput.Equal(expected, actual.(string), settingsFileName + " : STRING_VARIABLE")

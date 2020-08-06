@@ -45,7 +45,7 @@ func getInstance(path string) (*VWOInstance, error) {
 
 type WUserStorage interface {
 	Getter(userID, campaignKey string) schema.UserData
-	Setter(userID, campaignKey, variationName string)
+	Setter(userID, campaignKey, variationName, goalIdentifier string)
 }
 
 type WUserStorageData struct{}
@@ -53,7 +53,7 @@ type WUserStorageData struct{}
 func (us *WUserStorageData) Getter(userID, campaignKey string) schema.UserData {
 	return schema.UserData{}
 }
-func (us *WUserStorageData) Setter(userID, campaignKey, variationName string) {}
+func (us *WUserStorageData) Setter(userID, campaignKey, variationName, goalIdentifier string) {}
 
 func TestInit(t *testing.T) {
 	vwoInstance := VWOInstance{}
@@ -62,7 +62,7 @@ func TestInit(t *testing.T) {
 
 	vwoInstance = VWOInstance{}
 	storage := &WUserStorageData{}
-	_, err = vwoInstance.Init(WithStorage(storage))
+	_, err = vwoInstance.Init(WithStorage(storage), WithGoalAttributes(nil, false))
 	assert.NotNil(t, err)
 
 	logs := logger.Init(constants.SDKName, true, false, ioutil.Discard)

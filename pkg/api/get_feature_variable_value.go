@@ -87,7 +87,7 @@ func (vwo *VWOInstance) GetFeatureVariableValue(campaignKey, variableKey, userID
 		return nil
 	}
 
-	variation, err := core.GetVariation(vwoInstance, userID, campaign, options)
+	variation, _, err := core.GetVariation(vwoInstance, userID, campaign, "", options)
 	if err != nil {
 		message := fmt.Sprintf(constants.InfoMessageInvalidVariationKey, vwoInstance.API, userID, campaignKey, err.Error())
 		utils.LogMessage(vwo.Logger, constants.Info, getFeatureVariableValue, message)

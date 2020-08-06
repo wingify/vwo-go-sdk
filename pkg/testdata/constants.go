@@ -37,6 +37,7 @@ const (
 	InvalidUser              = "UserInvalid"
 	InvalidOperator          = "InvalidOperator"
 	DummyVariation           = "DummyVariation"
+	DummyGoal                = "DummyGoal"
 	TempUser                 = "TempUser"
 	ValidVariationControl    = "Control"
 	ValidVariationVariation2 = "Variation-2"

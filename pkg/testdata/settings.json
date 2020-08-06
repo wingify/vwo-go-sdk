@@ -1295,6 +1295,10 @@
             "identifier": "CUSTOM_RECOMMENDATION_AB_GOAL",
             "id": 203,
             "type": "CUSTOM_GOAL"
+          }, {
+            "identifier": "FEATURE_TEST_GOAL",
+            "id": 204,
+            "type": "CUSTOM_GOAL"
           }
         ],
         "variations": [

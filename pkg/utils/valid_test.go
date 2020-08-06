@@ -96,6 +96,8 @@ func TestParseOptions(t *testing.T) {
 	expected := schema.Options{}
 	expected.CustomVariables = make(map[string]interface{})
 	expected.VariationTargetingVariables = make(map[string]interface{})
+	expected.ShouldTrackReturningUser = nil
+	expected.GoalTypeToTrack = nil
 	actual := ParseOptions(nil)
 	assert.Equal(t, expected, actual)
 
@@ -103,10 +105,14 @@ func TestParseOptions(t *testing.T) {
 	data["customVariables"] = map[string]interface{}{"a": "x"}
 	data["variationTargetingVariables"] = map[string]interface{}{"a": "x"}
 	data["revenueValue"] = 12
+	data["goalTypeToTrack"] = "ALL"
+	data["shouldTrackReturningUser"] = false
 	expected = schema.Options{
 		CustomVariables:             map[string]interface{}{"a": "x"},
 		VariationTargetingVariables: map[string]interface{}{"a": "x"},
 		RevenueValue:                12,
+		GoalTypeToTrack:             "ALL",
+		ShouldTrackReturningUser:    false,
 	}
 	actual = ParseOptions(data)
 	assert.Equal(t, expected, actual)
@@ -153,9 +159,21 @@ func TestValidatePush(t *testing.T) {
 }
 
 func TestValidateTrack(t *testing.T) {
-	actual := ValidateTrack("", "", "")
+	actual, _ := ValidateTrack("", "", "", "")
 	assert.False(t, actual)
 
-	actual = ValidateTrack("campaignKey", "userID", "goalIdentifier")
+	actual, _ = ValidateTrack("userID", "goalIdentifier", nil, nil)
 	assert.True(t, actual)
+
+	actual, _ = ValidateTrack("userID", "goalIdentifier", constants.GoalTypeRevenue, true)
+	assert.True(t, actual)
+
+	actual, _ = ValidateTrack("userID", "goalIdentifier", "Invalid_Type", true)
+	assert.False(t, actual)
+
+	actual, _ = ValidateTrack("userID", "goalIdentifier", "CUSTOM_GOAL", 123)
+	assert.False(t, actual)
+
+	actual, _ = ValidateTrack("userID", "goalIdentifier", 123, true)
+	assert.False(t, actual)
 }
