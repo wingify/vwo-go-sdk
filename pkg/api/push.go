@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ func (vwo *VWOInstance) Push(tagKey, tagValue, userID string) bool {
 		IsDevelopmentMode: vwo.IsDevelopmentMode,
 		UserID:            userID,
 		API:               "Push",
+		Integrations:      vwo.Integrations,
 	}
 
 	if !utils.ValidatePush(tagKey, tagValue, userID) {
@@ -71,7 +72,11 @@ func (vwo *VWOInstance) Push(tagKey, tagValue, userID string) bool {
 	}
 
 	impression := utils.CreateImpressionForPush(vwoInstance, tagKey, tagValue, userID)
-	go event.Dispatch(vwoInstance, impression)
+	if vwo.IsBatchingEnabled {
+		vwo.AddToBatch(impression)
+	} else {
+		go event.Dispatch(vwoInstance, impression)
+	}
 
 	message := fmt.Sprintf(constants.InfoMessageMainKeysForPushAPI, vwoInstance.API, vwoInstance.SettingsFile.AccountID, userID, impression.U, impression.URL)
 	utils.LogMessage(vwo.Logger, constants.Info, push, message)

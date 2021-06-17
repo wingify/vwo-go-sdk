@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package logger
+package schema
 
-import (
-	"log/syslog"
-)
-
-func setup(src string) (*syslog.Writer, *syslog.Writer, *syslog.Writer, error) {
-	const facility = syslog.LOG_USER
-	il, err := syslog.New(facility|syslog.LOG_NOTICE, src)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	wl, err := syslog.New(facility|syslog.LOG_WARNING, src)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	el, err := syslog.New(facility|syslog.LOG_ERR, src)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	return il, wl, el, nil
+type VwoInstance struct {
+	SettingsFile             SettingsFile
+	UserStorage              interface{}
+	Logger                   interface{}
+	IsDevelopmentMode        bool
+	UserID                   string
+	Campaign                 Campaign
+	API                      string
+	GoalTypeToTrack          interface{}
+	ShouldTrackReturningUser interface{}
+	BatchEventQueue          BatchEventQueue
+	IsBatchingEnabled        bool
+	Integrations             Integrations
 }

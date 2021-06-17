@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ func TestIsFeatureEnabled(t *testing.T) {
 			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
 				if variation.Name == "Control" {
 					actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[0].Key, userID, nil)
-					
+
 					assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
 					assertOutput.Nil(err, "Error encuntered")
 					assertOutput.False(actual, "Feature Test Campaign : " + variation.Name + userID)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ func (vwo *VWOInstance) Activate(campaignKey, userID string, option interface{})
 		Returns:
 			string: Variation Name for user to corresponding camapign
 	*/
-
 	options := utils.ParseOptions(option)
 
 	vwoInstance := schema.VwoInstance{
@@ -60,6 +59,7 @@ func (vwo *VWOInstance) Activate(campaignKey, userID string, option interface{})
 		Logger:            vwo.Logger,
 		IsDevelopmentMode: vwo.IsDevelopmentMode,
 		API:               "Activate",
+		Integrations:      vwo.Integrations,
 	}
 
 	if !utils.ValidateActivate(campaignKey, userID) {
@@ -96,8 +96,12 @@ func (vwo *VWOInstance) Activate(campaignKey, userID string, option interface{})
 	}
 
 	impression := utils.CreateImpressionTrackingUser(vwoInstance, campaign.ID, variation.ID, userID)
-	go event.Dispatch(vwoInstance, impression)
 
+	if vwo.IsBatchingEnabled {
+		vwo.AddToBatch(impression)
+	} else {
+		go event.Dispatch(vwoInstance, impression)
+	}
 	message := fmt.Sprintf(constants.InfoMessageMainKeysForImpression, vwoInstance.API, vwoInstance.SettingsFile.AccountID, vwoInstance.UserID, campaign.ID, variation.ID)
 	utils.LogMessage(vwo.Logger, constants.Info, activate, message)
 

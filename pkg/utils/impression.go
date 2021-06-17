@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ func CreateImpressionForPush(vwoInstance schema.VwoInstance, tagKey, tagValue, u
 	impression.URL = constants.HTTPSProtocol + constants.EndPointsBaseURL + constants.EndPointsPush
 
 	impression.Tags = `{"u":{"` + url.QueryEscape(tagKey) + `":"` + url.QueryEscape(tagValue) + `"}}`
-
+	impression.EventType = constants.EventsPush
 	message := fmt.Sprintf(constants.DebugMessageImpressionForPush, vwoInstance.API, impression.AccountID, impression.UID, impression.SID, impression.URL, impression.Tags)
 	LogMessage(vwoInstance.Logger, constants.Debug, impressions, message)
 
@@ -71,6 +71,7 @@ func CreateImpressionTrackingGoal(vwoInstance schema.VwoInstance, variationID in
 
 	impression.URL = constants.HTTPSProtocol + constants.EndPointsBaseURL + constants.EndPointsTrackGoal
 	impression.GoalID = goalID
+	impression.EventType = constants.EventsTrackGoal
 
 	if goalType == constants.GoalTypeRevenue {
 		switch revenueValue.(type) {
@@ -114,6 +115,7 @@ func CreateImpressionTrackingUser(vwoInstance schema.VwoInstance, campaignID int
 
 	impression.ED = `{\"p\":\"` + constants.Platform + `\"}`
 	impression.URL = constants.HTTPSProtocol + constants.EndPointsBaseURL + constants.EndPointsTrackUser
+	impression.EventType = constants.EventsTrackUser
 
 	message := fmt.Sprintf(constants.DebugMessageImpressionForTrackUser, vwoInstance.API, impression.AccountID, impression.UID, impression.SID, impression.URL, impression.ExperimentID, impression.Combination, impression.ED)
 	LogMessage(vwoInstance.Logger, constants.Debug, impressions, message)
@@ -136,7 +138,7 @@ func getCommonProperties(vwoInstance schema.VwoInstance, userID string) schema.I
 		SdkV:      constants.SDKVersion,
 		Ap:        constants.Platform,
 		SID:       strconv.FormatInt(time.Now().Unix(), 10),
-		U:         generateFor(vwoInstance, userID, vwoInstance.SettingsFile.AccountID),
+		U:         GenerateFor(vwoInstance, userID, vwoInstance.SettingsFile.AccountID),
 		AccountID: vwoInstance.SettingsFile.AccountID,
 		UID:       url.PathEscape(userID),
 	}

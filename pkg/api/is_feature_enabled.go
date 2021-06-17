@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ func (vwo *VWOInstance) IsFeatureEnabled(campaignKey, userID string, option inte
 		Logger:            vwo.Logger,
 		IsDevelopmentMode: vwo.IsDevelopmentMode,
 		API:               "IsFeatureEnabled",
+		Integrations:      vwo.Integrations,
 	}
 
 	if !utils.ValidateIsFeatureEnabled(campaignKey, userID) {
@@ -97,7 +98,11 @@ func (vwo *VWOInstance) IsFeatureEnabled(campaignKey, userID string, option inte
 	if utils.CheckCampaignType(campaign, constants.CampaignTypeFeatureTest) {
 		isFeatureEnabled = variation.IsFeatureEnabled
 		impression := utils.CreateImpressionTrackingUser(vwoInstance, campaign.ID, variation.ID, userID)
-		go event.Dispatch(vwoInstance, impression)
+		if vwo.IsBatchingEnabled {
+			vwo.AddToBatch(impression)
+		} else {
+			go event.Dispatch(vwoInstance, impression)
+		}
 	} else if utils.CheckCampaignType(campaign, constants.CampaignTypeFeatureRollout) {
 		isFeatureEnabled = true
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,11 @@ const (
 	DebugMessageUserNotPartOfCampaign           = "[%v] User ID: %v for CampaignKey: %v type: %v did not become part of campaign method: %v "
 	DebugMessageUUIDForUser                     = "[%v] Uuid generated for User ID: %v and accountId: %v is %v "
 	DebugMessageVariationHashBucketValue        = "[%v] User ID: %v for CampaignKey: %v having percent traffic: %v got bucket value: %v "
-
+	DebugBeforeBatchFlush                       = "Flushing events queue having length : %v for account: %v"
+	DebugAfterBatchFlush                        = "Events queue having %v events has been flushed "
+	DebugMessagePayloadTooLarge                 = "Impression event - %v failed due to exceeding payload size. Parameter eventsPerRequest in batchEvents config in launch API has value: %v. Please read the official documentation for knowing the size limits."
+	DebugMessageInvalidRequestTimeInterval      = "requestTimeInterval hould be > %v and <= %v. Assigning it the default value i.e %v seconds"
+	DebugMessageInvalidEventsPerRequest         = "eventsPerRequest should be >= %v and <= %v. Assigning it the default value i.e %v"
 	/*Extras*/
 	DebugMessageCustomLoggerFound     = "[%v] Custom logger found"
 	DebugMessageNoSegmentsInVariation = "[%v] For User ID: %v of Campaign: %v, segment was missing, hence skipping segmentation %v "
@@ -66,7 +70,7 @@ const (
 	ErrorMessageTrackAPIMissingParams                   = "[%v] %v got bad parameters. It expects campaignKey(String / array of string / nil) as first, User ID(String) as second, goalIdentifier(String) as third argument and options(Optional) as fourth parameter but got : %v"
 	ErrorMessageTrackAPIRevenueNotPassedForRevenueValue = "[%v] Revenue value should be passed for revenue, Goal: %v for Campaign: %v and User ID: %v "
 	ErrorMessageVariableNotFound                        = "[%v] Variable: %v not found for User ID: %v for campaign %v of type %v "
-
+	ErrorMessageSettingsFileUpdateFailed                = "Settings File Could not be updated for accountId : %v : %v"
 	/*Extras*/
 	ErrorMessageCampaignNotFound                          = "[%v] Campaign key: %v not found : %v "
 	ErrorMessageCannotProcessSettingsFile                 = "[%v] Error processing settings file err : %v "
@@ -89,6 +93,8 @@ const (
 	ErrorMessageTrackAPIIncorrectGoalTypeToTrack          = "GoalTypeTotrack should only have value REVENUE_TRACKING, CUSTOM_GOAL or ALL but got %v"
 	ErrorMessageURLNotFound                               = "[%v] URL not Found: %v "
 	ErrorMessageVariationNotFound                         = "[%v] Variation : %v not found in campaign : %v "
+	ErrorMessageBatchImpressionFailed                     = "Impression event could not be sent to VWO endpoint - %v. Status code: %v"
+	ErrorMessageBatchFlushError                           = "Error encountered in batch flush: %v"
 
 	//Info Messages
 	InfoMessageFeatureEnabledForUser            = "[%v] Campaign: %v for user ID: %v is enabled"
@@ -113,7 +119,8 @@ const (
 	InfoMessageVariationAllocated               = "[%v] User ID: %v of Campaign: %v got variation: %v "
 	InfoMessageVariationRangeAllocation         = "[%v] Variation: %v with weight: %v got range as: ( %v - %v )"
 	InfoMessageWhitelistingSkipped              = "[%v] For User ID: %v of Campaign: %v, whitelisting was skipped"
-
+	InfoSDKInstanceUpdated                      = "vwo-sdk instance is updated with the latest settings-file for the accountId: %v"
+	InfoBatchImpressionSuccess                  = "Impression event - %v was successfully received by VWO"
 	/*Extras*/
 	InfoMessageNoTargettedVariation      = "[%v] No targetted variation found : %v "
 	InfoMessageNoWhitelistedVariation    = "[%v] No whitelisting variation found in campaign: %v "

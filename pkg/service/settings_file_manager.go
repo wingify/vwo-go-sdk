@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,14 @@ type SettingsFileManager struct {
 }
 
 // FetchSettingsFile function makes call to VWO server to fetch the settings file
-func (sfm *SettingsFileManager) FetchSettingsFile(accountID, SDKKey string) error {
+func (sfm *SettingsFileManager) FetchSettingsFile(accountID, SDKKey string, isViaWebHook bool) error {
 	/*
-		Args:
-			accountID: Config account ID
-			SDKKey: Config SDK Key
-
-		Returns:
-			error: nil if the settings file id fetched else the error
+			Args:
+				accountID: Config account ID
+				SDKKey: Config SDK Key
+	      isViaWebHook: specifies if the fetch operation is triggered by a webhook
+			Returns:
+				error: nil if the settings file id fetched else the error
 	*/
 
 	if accountID == "" {
@@ -53,9 +53,14 @@ func (sfm *SettingsFileManager) FetchSettingsFile(accountID, SDKKey string) erro
 		return fmt.Errorf(constants.ErrorMessageInvalidSDKKey, "")
 	}
 
+	endpoint := constants.AccountSettings
+	if isViaWebHook {
+		endpoint = constants.WebHookAccountSettings
+	}
+
 	protocol := constants.HTTPSProtocol
 	hostname := constants.BaseURL
-	path := constants.AccountSettings + "?" +
+	path := endpoint + "?" +
 		"a=" + accountID +
 		"&i=" + SDKKey +
 		"&r=" + strconv.FormatFloat(float64(rand.Float32()), 'f', -1, 64) +
@@ -68,7 +73,7 @@ func (sfm *SettingsFileManager) FetchSettingsFile(accountID, SDKKey string) erro
 	if err != nil {
 		return fmt.Errorf(constants.ErrorMessageSettingsFileCorrupted, "", err.Error())
 	}
-
+  resp = utils.JsonCleanUp(resp)
 	if err = json.Unmarshal([]byte(resp), &sfm.SettingsFile); err != nil {
 		return fmt.Errorf(constants.ErrorMessageInvalidSettingsFile, "", err.Error())
 	}

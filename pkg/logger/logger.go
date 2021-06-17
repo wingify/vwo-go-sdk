@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,16 @@ const (
 	sWarning
 	sError
 	sFatal
+	sDebug
 )
 
 // Severity tags.
 const (
 	tagInfo    = "INFO : "
-	tagWarning = "DEBUG : "
+	tagWarning = "WARNING : "
 	tagError   = "ERROR : "
 	tagFatal   = "FATAL : "
+	tagDebug   = "DEBUG : "
 )
 
 const (
@@ -56,6 +58,7 @@ var (
 // initialize resets defaultLogger.  Which allows tests to reset environment.
 func initialize() {
 	defaultLogger = &Logger{
+		debugLog:   log.New(os.Stderr, initText+tagDebug, flags),
 		infoLog:    log.New(os.Stderr, initText+tagInfo, flags),
 		warningLog: log.New(os.Stderr, initText+tagWarning, flags),
 		errorLog:   log.New(os.Stderr, initText+tagError, flags),
@@ -102,6 +105,7 @@ func Init(name string, verbose, systemLog bool, logFile io.Writer) *Logger {
 	}
 
 	l := Logger{
+		debugLog:   log.New(io.MultiWriter(iLogs...), tagDebug, flags),
 		infoLog:    log.New(io.MultiWriter(iLogs...), tagInfo, flags),
 		warningLog: log.New(io.MultiWriter(wLogs...), tagWarning, flags),
 		errorLog:   log.New(io.MultiWriter(eLogs...), tagError, flags),
@@ -145,6 +149,7 @@ type Verbose struct {
 // A Logger represents an active logging object. Multiple loggers can be used
 // simultaneously even if they are using the same same writers.
 type Logger struct {
+	debugLog    *log.Logger
 	infoLog     *log.Logger
 	warningLog  *log.Logger
 	errorLog    *log.Logger
@@ -173,6 +178,10 @@ func (l *Logger) output(s severity, depth int, txt string) {
 	case sFatal:
 		if logLevel >= 1 {
 			l.fatalLog.Output(3+depth, txt)
+		}
+	case sDebug:
+		if logLevel >= 3 {
+			l.debugLog.Output(3+depth, txt)
 		}
 	default:
 		panic(fmt.Sprintln("unrecognized severity:", s))
@@ -249,6 +258,28 @@ func (l *Logger) Warningln(v ...interface{}) {
 // Arguments are handled in the manner of fmt.Printf.
 func (l *Logger) Warningf(format string, v ...interface{}) {
 	l.output(sWarning, 0, fmt.Sprintf(format, v...))
+}
+
+func (l *Logger) Debug(v ...interface{}) {
+	l.output(sDebug, 0, fmt.Sprint(v...))
+}
+
+// DebugDepth acts as Debug but uses depth to determine which call frame to log.
+// DebugDepth(0, "msg") is the same as Debug("msg").
+func (l *Logger) DebugDepth(depth int, v ...interface{}) {
+	l.output(sDebug, depth, fmt.Sprint(v...))
+}
+
+// Debugln logs with the Debug severity.
+// Arguments are handled in the manner of fmt.Println.
+func (l *Logger) Debugln(v ...interface{}) {
+	l.output(sDebug, 0, fmt.Sprintln(v...))
+}
+
+// Debugf logs with the Debug severity.
+// Arguments are handled in the manner of fmt.Printf.
+func (l *Logger) Debugf(format string, v ...interface{}) {
+	l.output(sDebug, 0, fmt.Sprintf(format, v...))
 }
 
 // Error logs with the ERROR severity.
@@ -347,6 +378,7 @@ func (v Verbose) Infof(format string, args ...interface{}) {
 
 // SetFlags sets the output flags for the logger.
 func SetFlags(flag int) {
+	defaultLogger.debugLog.SetFlags(flag)
 	defaultLogger.infoLog.SetFlags(flag)
 	defaultLogger.warningLog.SetFlags(flag)
 	defaultLogger.errorLog.SetFlags(flag)

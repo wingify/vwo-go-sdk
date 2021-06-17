@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ func (vwo *VWOInstance) Track(campaignKeys interface{}, userID, goalIdentifier s
 		API:                      "Track",
 		GoalTypeToTrack:          vwo.GoalTypeToTrack,
 		ShouldTrackReturningUser: vwo.ShouldTrackReturningUser,
+		Integrations:             vwo.Integrations,
 	}
 
 	options := utils.ParseOptions(option)
@@ -141,7 +142,7 @@ func (vwo *VWOInstance) Track(campaignKeys interface{}, userID, goalIdentifier s
 	for _, campaign := range Campaigns {
 		currResult := schema.TrackResult{
 			CampaignKey: campaign.Key,
-			TrackValue:  trackCampaignGoal(vwoInstance, campaign, userID, goalIdentifier, goalTypeToTrack, shouldTrackReturningUser, options),
+			TrackValue:  trackCampaignGoal(vwo, vwoInstance, campaign, userID, goalIdentifier, goalTypeToTrack, shouldTrackReturningUser, options),
 		}
 		result = append(result, currResult)
 	}
@@ -155,7 +156,7 @@ func (vwo *VWOInstance) Track(campaignKeys interface{}, userID, goalIdentifier s
 	return result
 }
 
-func trackCampaignGoal(vwoInstance schema.VwoInstance, campaign schema.Campaign, userID, goalIdentifier, goalTypeToTrack string, shouldTrackReturningUser bool, options schema.Options) bool {
+func trackCampaignGoal(vwo *VWOInstance, vwoInstance schema.VwoInstance, campaign schema.Campaign, userID, goalIdentifier, goalTypeToTrack string, shouldTrackReturningUser bool, options schema.Options) bool {
 	/*
 		Args:
 			campaign: campaign whose user is to be tracked
@@ -237,7 +238,7 @@ func trackCampaignGoal(vwoInstance schema.VwoInstance, campaign schema.Campaign,
 		} else {
 			if vwoInstance.UserStorage == nil {
 				message := fmt.Sprintf(constants.DebugMessageNoUserStorageServiceSet, vwoInstance.API)
-				utils.LogMessage(vwoInstance.Logger, constants.Debug, track, message)
+				utils.LogMessage(vwoInstance.Logger, constants.Warning, track, message)
 			} else {
 				if storage, ok := vwoInstance.UserStorage.(interface{ Set(a, b, c, d string) }); ok {
 					storage.Set(userID, campaign.Key, variation.Name, goalIdentifier)
@@ -251,7 +252,11 @@ func trackCampaignGoal(vwoInstance schema.VwoInstance, campaign schema.Campaign,
 		}
 
 		impression := utils.CreateImpressionTrackingGoal(vwoInstance, variation.ID, userID, goal.Type, campaign.ID, goal.ID, options.RevenueValue)
-		go event.DispatchTrackingGoal(vwoInstance, goal.Type, impression)
+		if vwo.IsBatchingEnabled {
+			vwo.AddToBatch(impression)
+		} else {
+			go event.DispatchTrackingGoal(vwoInstance, goal.Type, impression)
+		}
 
 		message := fmt.Sprintf(constants.InfoMessageMainKeysForImpression, vwoInstance.API, vwoInstance.SettingsFile.AccountID, vwoInstance.UserID, campaign.ID, variation.ID)
 		utils.LogMessage(vwoInstance.Logger, constants.Info, activate, message)

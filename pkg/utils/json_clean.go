@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package logger
+package utils
 
 import (
-	"log/syslog"
+	"regexp"
 )
 
-func setup(src string) (*syslog.Writer, *syslog.Writer, *syslog.Writer, error) {
-	const facility = syslog.LOG_USER
-	il, err := syslog.New(facility|syslog.LOG_NOTICE, src)
-	if err != nil {
-		return nil, nil, nil, err
+var jsonCleanUpMap map[string]string
+
+func init() {
+	jsonCleanUpMap = make(map[string]string)
+	jsonCleanUpMap[`("goals":{})`] = "\"goals\":[]"
+	jsonCleanUpMap[`("variables":{})`] = "\"variables\":[]"
+}
+
+func JsonCleanUp(settingsFile string) string {
+	for regex, replace := range jsonCleanUpMap {
+		settingsFile = regexp.MustCompile(regex).ReplaceAllString(settingsFile, replace)
 	}
-	wl, err := syslog.New(facility|syslog.LOG_WARNING, src)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	el, err := syslog.New(facility|syslog.LOG_ERR, src)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	return il, wl, el, nil
+	return settingsFile
 }

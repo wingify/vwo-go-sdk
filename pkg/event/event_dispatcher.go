@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import (
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/utils"
+	"regexp"
 )
 
 const eventDispatcher = "eventDispatcher.go"
@@ -43,8 +44,8 @@ func Dispatch(vwoInstance schema.VwoInstance, impression schema.Impression) {
 			"&sId=" + impression.SID +
 			"&u=" + impression.U +
 			"&account_id=" + strconv.Itoa(impression.AccountID) +
-			"&uId=" + impression.UID +
-			"&tags=" + impression.Tags
+			"&tags=" + impression.Tags +
+			"&env=" + vwoInstance.SettingsFile.SDKKey
 
 		if vwoInstance.API != "Push" {
 			URL = URL + "&ed=" + impression.ED +
@@ -53,16 +54,17 @@ func Dispatch(vwoInstance schema.VwoInstance, impression schema.Impression) {
 		}
 
 		_, err := utils.GetRequest(URL)
+		logURL := regexp.MustCompile(`(&env=.{32})`).ReplaceAllString(URL, "")
 
 		if err != nil {
 			message := fmt.Sprintf(constants.ErrorMessageImpressionFailed, vwoInstance.API, err)
 			utils.LogMessage(vwoInstance.Logger, constants.Error, eventDispatcher, message)
 		} else {
 			if vwoInstance.API == "Push" {
-				message := fmt.Sprintf(constants.InfoMessageImpressionSuccess, vwoInstance.API, "Push", URL)
+				message := fmt.Sprintf(constants.InfoMessageImpressionSuccess, vwoInstance.API, "Push", logURL)
 				utils.LogMessage(vwoInstance.Logger, constants.Info, eventDispatcher, message)
-				} else {
-				message := fmt.Sprintf(constants.InfoMessageImpressionSuccess, vwoInstance.API, "Tracking User", URL)
+			} else {
+				message := fmt.Sprintf(constants.InfoMessageImpressionSuccess, vwoInstance.API, "Tracking User", logURL)
 				utils.LogMessage(vwoInstance.Logger, constants.Info, eventDispatcher, message)
 			}
 		}
@@ -86,10 +88,10 @@ func DispatchTrackingGoal(vwoInstance schema.VwoInstance, goalType string, impre
 			"&sId=" + impression.SID +
 			"&u=" + impression.U +
 			"&account_id=" + strconv.Itoa(impression.AccountID) +
-			"&uId=" + impression.UID +
 			"&experiment_id=" + strconv.Itoa(impression.ExperimentID) +
 			"&combination=" + strconv.Itoa(impression.Combination) +
-			"&goal_id=" + strconv.Itoa(impression.GoalID)
+			"&goal_id=" + strconv.Itoa(impression.GoalID) +
+			"&env=" + vwoInstance.SettingsFile.SDKKey
 
 		if goalType == constants.GoalTypeRevenue {
 			URL = URL + "&r=" + impression.R
@@ -97,11 +99,13 @@ func DispatchTrackingGoal(vwoInstance schema.VwoInstance, goalType string, impre
 
 		_, err := utils.GetRequest(URL)
 
+		logURL := regexp.MustCompile(`(&env=.{32})`).ReplaceAllString(URL, "")
+
 		if err != nil {
 			message := fmt.Sprintf(constants.ErrorMessageImpressionFailed, vwoInstance.API, err)
 			utils.LogMessage(vwoInstance.Logger, constants.Error, eventDispatcher, message)
 		} else {
-			message := fmt.Sprintf(constants.InfoMessageImpressionSuccess, vwoInstance.API, "Tracking Goal", URL)
+			message := fmt.Sprintf(constants.InfoMessageImpressionSuccess, vwoInstance.API, "Tracking Goal", logURL)
 			utils.LogMessage(vwoInstance.Logger, constants.Info, eventDispatcher, message)
 		}
 	}

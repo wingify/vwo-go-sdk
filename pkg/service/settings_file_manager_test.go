@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ import (
 
 func TestFetchSettingsFile(t *testing.T) {
 	settingsFileManager := SettingsFileManager{}
-	err := settingsFileManager.FetchSettingsFile(testdata.DummyAccountID, testdata.DummySDKKey)
+	err := settingsFileManager.FetchSettingsFile(testdata.DummyAccountID, testdata.DummySDKKey, false)
 	assert.Error(t, err, "No settingsFile processed")
 
-	err = settingsFileManager.FetchSettingsFile(testdata.InvalidAccountID, testdata.InvalidSDKKey)
+	err = settingsFileManager.FetchSettingsFile(testdata.InvalidAccountID, testdata.InvalidSDKKey, false)
 	assert.Error(t, err, "No settingsFile processed")
 
-	err = settingsFileManager.FetchSettingsFile(testdata.DummyAccountID, testdata.InvalidSDKKey)
+	err = settingsFileManager.FetchSettingsFile(testdata.DummyAccountID, testdata.InvalidSDKKey, false)
 	assert.Error(t, err, "No settingsFile processed")
 }
 

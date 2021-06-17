@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,6 @@
  */
 
 package schema
-
-// VwoInstance struct utils
-type VwoInstance struct {
-	SettingsFile             SettingsFile
-	UserStorage              interface{}
-	Logger                   interface{}
-	IsDevelopmentMode        bool
-	UserID                   string
-	Campaign                 Campaign
-	API                      string
-	GoalTypeToTrack          interface{}
-	ShouldTrackReturningUser interface{}
-}
 
 // SettingsFile struct
 type SettingsFile struct {
@@ -120,10 +107,11 @@ type Impression struct {
 	GoalID       int     `json:"goal_id"`
 	R            string  `json:"r"`
 	Tags         string  `json:"tags"`
+	EventType    string  `json:"eventType"`
 }
 
 // TrackResult struct
 type TrackResult struct {
 	CampaignKey string
-	TrackValue bool
+	TrackValue  bool
 }

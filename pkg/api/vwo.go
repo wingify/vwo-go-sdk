@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,13 @@ func (vwo VWOInstance) Init(vwoOption ...VWOOption) (*VWOInstance, error) {
 		return &vwo, fmt.Errorf(constants.ErrorMessageInvalidLoggerStorage, "")
 	}
 
+	if vwo.IsBatchingEnabled {
+		vwo.BatchEventQueue.AccountID = vwo.SettingsFile.AccountID
+		vwo.BatchEventQueue.SDKKey = vwo.SettingsFile.SDKKey
+		vwo.BatchEventQueue.IsDevelopmentMode = vwo.IsDevelopmentMode
+		vwo.BatchEventQueue.Logger = vwo.Logger
+	}
+
 	message := fmt.Sprintf(constants.DebugMessageDevelopmentMode+constants.DebugMessageSDKInitialized, vwo.IsDevelopmentMode)
 	utils.LogMessage(vwo.Logger, constants.Debug, fileVWO, message)
 
@@ -97,5 +104,38 @@ func WithGoalAttributes(goalTypeToTrack interface{}, shouldTrackReturningUser in
 	return func(vwo *VWOInstance) {
 		vwo.GoalTypeToTrack = goalTypeToTrack
 		vwo.ShouldTrackReturningUser = shouldTrackReturningUser
+	}
+}
+
+func (vwoInstance *VWOInstance) AddToBatch(impression schema.Impression) {
+	vwoInstance.BatchEventQueue.AddToBatch(impression)
+}
+
+func (vwoInstance *VWOInstance) FlushEvents() {
+	vwoInstance.BatchEventQueue.FlushBatch()
+}
+
+func WithBatchEventQueue(batchConfig BatchConfig, flushCallBack func(error, []map[string]interface{})) VWOOption {
+	return func(vwo *VWOInstance) {
+		vwo.IsBatchingEnabled = true
+		if batchConfig.EventsPerRequest < 1 || batchConfig.EventsPerRequest > constants.BatchMaxEventsPerRequest {
+			log.Println(fmt.Sprintf(constants.DebugMessageInvalidEventsPerRequest, constants.BatchMinEventsPerRequest, constants.BatchMaxEventsPerRequest, constants.BatchDefaultEventsPerRequest))
+			batchConfig.SetDefaults()
+		}
+		if !(batchConfig.RequestTimeInterval > 1) {
+			log.Println(fmt.Sprintf(constants.DebugMessageInvalidRequestTimeInterval, constants.BatchMinRequestInterval, constants.BatchDefaultRequestInterval))
+			batchConfig.SetDefaults()
+		}
+		vwo.BatchEventQueue = schema.BatchEventQueue{
+			RequestTimeInterval: utils.Max(batchConfig.RequestTimeInterval, constants.BatchMinRequestInterval),
+			EventsPerRequest:    utils.Min(batchConfig.EventsPerRequest, constants.BatchMaxEventsPerRequest),
+			FlushCallBack:       flushCallBack,
+		}
+	}
+}
+
+func WithIntegrationsCallBack(callBack func(map[string]interface{})) VWOOption {
+	return func(vwo *VWOInstance) {
+		vwo.Integrations = schema.Integrations{CallBack: callBack}
 	}
 }

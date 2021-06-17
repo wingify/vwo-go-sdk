@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ const (
 	MaxTrafficPercent = 100
 	MaxTrafficValue   = 10000
 	StatusRunning     = "RUNNING"
-	SDKVersion        = "1.8.0"
+	SDKVersion        = "1.14.0"
 	SDKName           = "vwo-go-sdk"
 	Platform          = "server"
 	SeedValue         = 1
@@ -30,9 +30,9 @@ const (
 	CampaignTypeFeatureTest    = "FEATURE_TEST"
 	CampaignTypeFeatureRollout = "FEATURE_ROLLOUT"
 
-	GoalTypeRevenue = "REVENUE_TRACKING"
-	GoalTypeCustom  = "CUSTOM_GOAL"
-	GoalTypeAll 		= "ALL"
+	GoalTypeRevenue         = "REVENUE_TRACKING"
+	GoalTypeCustom          = "CUSTOM_GOAL"
+	GoalTypeAll             = "ALL"
 	GoalIdentifierSeperator = "_vwo_"
 
 	PushAPITagValueLength = 255
@@ -52,11 +52,13 @@ const (
 	EndPointsTrackGoal       = "/server-side/track-goal"
 	EndPointsPush            = "/server-side/push"
 
-	BaseURL         = "dev.visualwebsiteoptimizer.com"
-	AccountSettings = "/server-side/settings"
-	TrackUser       = "/server-side/track-user"
-	TrackGoal       = "/server-side/track-goal"
-	Push            = "/server-side/push"
+	BaseURL                = "dev.visualwebsiteoptimizer.com"
+	AccountSettings        = "/server-side/settings"
+	TrackUser              = "/server-side/track-user"
+	TrackGoal              = "/server-side/track-goal"
+	Push                   = "/server-side/push"
+	WebHookAccountSettings = "/server-side/pull"
+	BatchEndPoint          = "/server-side/batch-events"
 
 	Boolean = "boolean"
 	Double  = "double"
@@ -76,7 +78,29 @@ const (
 	RegexValue              = 5
 	EqualValue              = 6
 
-	Info  = "INFO"
-	Debug = "WARN"
-	Error = "ERROR"
+	Info    = "INFO"
+	Debug   = "DEBUG"
+	Error   = "ERROR"
+	Warning = "WARN"
+
+	EventsTrackUser = "EVENTS_TRACK_USER"
+	EventsTrackGoal = "EVENTS_TRACK_GOAL"
+	EventsPush      = "EVENTS_PUSH"
+
+	HttpPostMethod = "POST"
+
+	BatchMinEventsPerRequest = 1
+	BatchMaxEventsPerRequest = 5000
+	BatchMinRequestInterval  = 1
+
+	BatchDefaultEventsPerRequest = 100
+	BatchDefaultRequestInterval  = 600
+
+	CampaignDecisionType = "CAMPAIGN_DECISION"
 )
+
+var EventTypeMapping = map[string]int{
+	EventsTrackUser: 1,
+	EventsTrackGoal: 2,
+	EventsPush:      3,
+}

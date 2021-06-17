@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ func TestGetFeatureVariableValue(t *testing.T) {
 			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
 				assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
 				assertOutput.Nil(err, "Error encuntered")
-				
+
 				actual := instance.GetFeatureVariableValue(instance.SettingsFile.Campaigns[0].Key, "STRING_VARIABLE", userID, nil)
 				assertOutput.Nil(actual, settingsFileName + " : STRING_VARIABLE")
 
@@ -173,7 +173,7 @@ func TestGetFeatureVariableValue(t *testing.T) {
 			if variation, storedGoalIdentifiers, err := core.GetVariation(vwoInstance, userID, instance.SettingsFile.Campaigns[0], "", schema.Options{}); variation.Name != "" {
 				assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
 				assertOutput.Nil(err, "Error encuntered")
-				
+
 				actual := instance.GetFeatureVariableValue(instance.SettingsFile.Campaigns[0].Key, "STRING_VARIABLE", userID, nil)
 				expected := userExpectation["STRING_VARIABLE"][variation.Name]
 				assertOutput.Equal(expected, actual.(string), settingsFileName + " : STRING_VARIABLE")

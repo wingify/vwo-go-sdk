@@ -1647,5 +1647,242 @@
     ],
     "accountId": 123456,
     "version": 2
+  },
+  "T_100_W_33_33_33_WS_WW" : {
+    "sdkKey": "someuniquestuff1234567",
+    "campaigns": [
+      {
+        "goals": [
+          {
+            "identifier": "CUSTOM",
+            "id": 218,
+            "type": "CUSTOM_GOAL"
+          }
+        ],
+        "variations": [
+          {
+            "id": 1,
+            "name": "Control",
+            "changes": {},
+            "weight": 33.3333,
+            "segments": {
+              "or": [
+                {
+                  "custom_variable": {
+                    "safari": "true"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": 2,
+            "name": "Variation-1",
+            "changes": {},
+            "weight": 33.3333,
+            "segments": {
+              "or": [
+                {
+                  "custom_variable": {
+                    "browser": "wildcard(chrome*)"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": 3,
+            "name": "Variation-2",
+            "changes": {},
+            "weight": 33.3333,
+            "segments": {
+              "or": [
+                {
+                  "custom_variable": {
+                    "chrome": "false"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "id": 235,
+        "percentTraffic": 100,
+        "key": "T_100_W_33_33_33_WS_WW",
+        "status": "RUNNING",
+        "type": "VISUAL_AB",
+        "isForcedVariationEnabled": true,
+        "segments": {
+          "or": [
+            {
+              "custom_variable": {
+                "eq": "something"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "accountId": 88888888,
+    "version": 1
+  },
+  "FT_100_W_33_33_33_WS_WW" : {
+    "sdkKey": "someuniquestuff1234567",
+    "campaigns": [
+      {
+        "goals": [
+          {
+            "identifier": "CUSTOM",
+            "id": 218,
+            "type": "CUSTOM_GOAL"
+          }
+        ],
+        "variations": [
+          {
+            "id": 1,
+            "name": "Control",
+            "changes": {},
+            "weight": 10,
+            "segments": {
+              "or": [
+                {
+                  "custom_variable": {
+                    "safari": "true"
+                  }
+                }
+              ]
+            },
+            "isFeatureEnabled": false,
+            "variables": [
+              {
+                "id": 1,
+                "key": "STRING_VARIABLE",
+                "type": "string",
+                "value": "Control string"
+              },
+              {
+                "id": 2,
+                "key": "INTEGER_VARIABLE",
+                "type": "integer",
+                "value": 123
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "name": "Variation-1",
+            "changes": {},
+            "weight": 20,
+            "segments": {
+              "or": [
+                {
+                  "custom_variable": {
+                    "browser": "wildcard(chrome*)"
+                  }
+                }
+              ]
+            },
+            "isFeatureEnabled": true,
+            "variables": [
+              {
+                "id": 1,
+                "key": "STRING_VARIABLE",
+                "type": "string",
+                "value": "Variation-1 string"
+              },
+              {
+                "id": 2,
+                "key": "INTEGER_VARIABLE",
+                "type": "integer",
+                "value": 456
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "name": "Variation-2",
+            "changes": {},
+            "weight": 30,
+            "segments": {
+              "or": [
+                {
+                  "custom_variable": {
+                    "chrome": "false"
+                  }
+                }
+              ]
+            },
+            "isFeatureEnabled": false,
+            "variables": [
+              {
+                "id": 1,
+                "key": "STRING_VARIABLE",
+                "type": "string",
+                "value": "Variation-2 string"
+              },
+              {
+                "id": 2,
+                "key": "INTEGER_VARIABLE",
+                "type": "integer",
+                "value": 789
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "name": "Variation-3",
+            "changes": {},
+            "weight": 40,
+            "segments": {
+              "or": [
+                {
+                  "custom_variable": {
+                    "browser": "regex(chrome)"
+                  }
+                }
+              ]
+            },
+            "isFeatureEnabled": false,
+            "variables": [
+              {
+                "id": 1,
+                "key": "STRING_VARIABLE",
+                "type": "string",
+                "value": "Variation-3 string"
+              },
+              {
+                "id": 2,
+                "key": "INTEGER_VARIABLE",
+                "type": "integer",
+                "value": 100
+              },
+              {
+                "id": 1,
+                "key": "FLOAT_VARIABLE",
+                "type": "double",
+                "value": 2.2
+              }
+            ]
+          }
+        ],
+        "id": 235,
+        "percentTraffic": 100,
+        "key": "FT_100_W_33_33_33_WS_WW",
+        "status": "RUNNING",
+        "type": "FEATURE_TEST",
+        "isForcedVariationEnabled": true,
+        "segments": {
+          "or": [
+            {
+              "custom_variable": {
+                "eq": "something"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "accountId": 88888888,
+    "version": 1
   }
 }

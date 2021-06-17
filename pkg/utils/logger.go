@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,11 @@ func LogMessage(logs interface{}, level, file, message string) {
 	case constants.Info:
 		log.Infoln(formattedMessage)
 	case constants.Debug:
-		log.Warningln(formattedMessage)
+		log.Debugln(formattedMessage)
 	case constants.Error:
 		log.Errorln(formattedMessage)
+	case constants.Warning:
+		log.Warningln(formattedMessage)
 	default:
 		log.Fatalln("Invalid Logger Level")
 	}

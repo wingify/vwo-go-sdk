@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 	*/
 	vwoInstance.UserID = userID
 	vwoInstance.Campaign = campaign
+	integrationsMap := getIntegrationsMap(vwoInstance, campaign, userID, goalIdentifier, options)
 
 	_, ok := options.VariationTargetingVariables["_vwo_user_id"]
 	if !ok {
@@ -74,6 +75,7 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 	} else {
 		message := fmt.Sprintf(constants.InfoMessageGotVariationForUser, vwoInstance.API, userID, campaign.Key, campaign.Type, targettedVariation.Name)
 		utils.LogMessage(vwoInstance.Logger, constants.Info, variationDecider, message)
+		vwoInstance.Integrations.ExecuteCallBack(integrationsMap, false, campaign, targettedVariation, true)
 		return targettedVariation, "", nil
 	}
 
@@ -82,7 +84,8 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 		message := fmt.Sprintf(constants.InfoMessageGotStoredVariation, vwoInstance.API, variationName, campaign.Key, userID)
 		utils.LogMessage(vwoInstance.Logger, constants.Info, variationDecider, message)
 		variation, err := utils.GetCampaignVariation(vwoInstance.API, campaign, variationName)
-		return variation, storedGoalIdentifier, err 
+		vwoInstance.Integrations.ExecuteCallBack(integrationsMap, true, campaign, variation, false)
+		return variation, storedGoalIdentifier, err
 	}
 
 	if !IsUserPartOfCampaign(vwoInstance, userID, campaign) {
@@ -91,13 +94,14 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 
 	if EvaluateSegment(vwoInstance, campaign.Segments, options) {
 		variation, err := BucketUserToVariation(vwoInstance, userID, campaign)
+		vwoInstance.Integrations.ExecuteCallBack(integrationsMap, false, campaign, variation, false)
 		if err != nil {
 			return schema.Variation{}, "", fmt.Errorf(constants.InfoMessageUserGotNoVariation, vwoInstance.API, userID, campaign.Key, err.Error())
 		}
 
 		if vwoInstance.UserStorage == nil {
 			message := fmt.Sprintf(constants.DebugMessageNoUserStorageServiceSet, vwoInstance.API)
-			utils.LogMessage(vwoInstance.Logger, constants.Debug, variationDecider, message)
+			utils.LogMessage(vwoInstance.Logger, constants.Warning, variationDecider, message)
 		} else {
 			if storage, ok := vwoInstance.UserStorage.(interface{ Set(a, b, c, d string) }); ok {
 				storage.Set(userID, campaign.Key, variation.Name, goalIdentifier)
@@ -194,7 +198,7 @@ func GetVariationFromUserStorage(vwoInstance schema.VwoInstance, userID string, 
 		}
 		return userStorageFetch.VariationName, userStorageFetch.GoalIdentifier
 	}
-	
+
 	message := fmt.Sprintf(constants.ErrorMessageGetUserStorageServiceFailed, vwoInstance.API, userID)
 	utils.LogMessage(vwoInstance.Logger, constants.Debug, variationDecider, message)
 	return "", ""
@@ -281,4 +285,22 @@ func PreEvaluateSegment(vwoInstance schema.VwoInstance, segments map[string]inte
 		return false
 	}
 	return SegmentEvaluator(segments, options.VariationTargetingVariables)
+}
+
+func getIntegrationsMap(vwoInstance schema.VwoInstance, campaign schema.Campaign, userID string, goalIdentifier string, options schema.Options) map[string]interface{} {
+	integrationsMap := make(map[string]interface{})
+	integrationsMap["campaignId"] = campaign.ID
+	integrationsMap["campaignKey"] = campaign.Key
+	integrationsMap["campaignType"] = campaign.Type
+	integrationsMap["customVariables"] = options.CustomVariables
+	integrationsMap["event"] = constants.CampaignDecisionType
+	integrationsMap["goalIdentifier"] = goalIdentifier
+	integrationsMap["isForcedVariationEnabled"] = campaign.IsForcedVariation
+	integrationsMap["sdkVersion"] = constants.SDKVersion
+	integrationsMap["source"] = vwoInstance.API
+	integrationsMap["userId"] = userID
+	integrationsMap["variationTargetingVariables"] = options.VariationTargetingVariables
+	integrationsMap["vwoUserId"] = utils.GenerateFor(vwoInstance, userID, vwoInstance.SettingsFile.AccountID)
+
+	return integrationsMap
 }

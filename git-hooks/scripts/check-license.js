@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ const checkLicenseUtil = require('./utils/CheckLicenseUtil');
 
 console.time('Execution time for License and Copyright');
 const isSuccess = checkLicenseUtil.checkLicenseAndCopyright({
-  year: '2020',
+  year: '2020-2021',
   author: 'Wingify Software Pvt. Ltd.',
   paths: 'pkg/',
   stoppingCriteria: '\\*\\/',

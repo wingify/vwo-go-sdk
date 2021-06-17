@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ func GetCampaignForKeys(vwoInstance schema.VwoInstance, campaignKeys []string) (
 			campaignKeys: Array of campaign keys to be searched
 
 		Returns:
-			[]schema.Campaign: Array of matching campaigns 
+			[]schema.Campaign: Array of matching campaigns
 	*/
 
 	var Campaigns []schema.Campaign
@@ -126,10 +126,10 @@ func GetCampaignForGoals(vwoInstance schema.VwoInstance, goalIdentifier, goalTyp
 		Args:
 			settingsFile  : Settings file for the project
 			goalidentifier : Goal to be searched in the campaigns
-			goalTypeToTrack : Type the searched goal should be 
+			goalTypeToTrack : Type the searched goal should be
 
 		Returns:
-			[]schema.Campaign: Array of matching campaigns 
+			[]schema.Campaign: Array of matching campaigns
 	*/
 
 	var Campaigns []schema.Campaign
@@ -143,7 +143,7 @@ func GetCampaignForGoals(vwoInstance schema.VwoInstance, goalIdentifier, goalTyp
 			}
 		}
 	}
-	
+
 	if len(Campaigns) == 0 {
 		return Campaigns, fmt.Errorf(constants.ErrorMessageNoCampaignInCampaignList, vwoInstance.API, goalIdentifier, goalTypeToTrack)
 	}

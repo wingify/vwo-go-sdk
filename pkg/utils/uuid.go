@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wingify/vwo-go-sdk/pkg/constants"
-	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	guuid "github.com/google/uuid"
 	suuid "github.com/satori/go.uuid"
+	"github.com/wingify/vwo-go-sdk/pkg/constants"
+	"github.com/wingify/vwo-go-sdk/pkg/schema"
 )
 
 const uuid = "uuid.go"
 
-// generateFor generates desired UUID
-func generateFor(vwoInstance schema.VwoInstance, userID string, accountID int) string {
+// GenerateFor generates desired UUID
+func GenerateFor(vwoInstance schema.VwoInstance, userID string, accountID int) string {
 	/*
 		Args:
 		    userID : User identifier

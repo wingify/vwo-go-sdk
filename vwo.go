@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2021 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ func GetSettingsFile(accountID, SDKKey string) schema.SettingsFile {
 			schema.SettingsFile: settings file fetched
 	*/
 	settingsFileManager := service.SettingsFileManager{}
-	if err := settingsFileManager.FetchSettingsFile(accountID, SDKKey); err != nil {
+	if err := settingsFileManager.FetchSettingsFile(accountID, SDKKey, false); err != nil {
 		logger.Warningf(fileVWO+" : "+constants.ErrorMessageCannotProcessSettingsFile, "", err.Error())
 	}
 	settingsFileManager.Process()
