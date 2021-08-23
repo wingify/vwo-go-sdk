@@ -25,7 +25,7 @@ import (
 	"testing"
 )
 
-func GetVWOInstance(settingsFileIdentifier string) api.VWOInstance {
+func GetVWOClientInstance(settingsFileIdentifier string) api.VWOInstance {
 	instance := api.VWOInstance{}
 	instance.SettingsFile = schema.SettingsFile{}
 
@@ -39,7 +39,7 @@ func GetVWOInstance(settingsFileIdentifier string) api.VWOInstance {
 
 func TestIntegrationsABTest(t *testing.T) {
 	assertOutput := assert.New(t)
-	instance := GetVWOInstance("AB_T_100_W_33_33_33")
+	instance := GetVWOClientInstance("AB_T_100_W_33_33_33")
 	instance.Integrations.CallBack = func(integrationsMap map[string]interface{}) {
 		assertOutput.Equal(len(integrationsMap), 16)
 		assertOutput.Equal(integrationsMap["fromUserStorageService"], false)
@@ -55,7 +55,7 @@ func TestIntegrationsABTest(t *testing.T) {
 	instance.GetVariationName("AB_T_100_W_33_33_33", userID, nil)
 
 	//with whitelisting
-	instance = GetVWOInstance("T_100_W_33_33_33_WS_WW")
+	instance = GetVWOClientInstance("T_100_W_33_33_33_WS_WW")
 	instance.Integrations.CallBack = func(integrationsMap map[string]interface{}) {
 		assertOutput.Equal(integrationsMap["fromUserStorageService"], false)
 		assertOutput.Equal(integrationsMap["isFeatureEnabled"], nil)
@@ -71,7 +71,7 @@ func TestIntegrationsABTest(t *testing.T) {
 
 func TestIntegrationFeatureRollout(t *testing.T) {
 	assertOutput := assert.New(t)
-	instance := GetVWOInstance("FR_T_100_W_100")
+	instance := GetVWOClientInstance("FR_T_100_W_100")
 	userID := testdata.GetRandomUser()
 	instance.Integrations.CallBack = func(integrationsMap map[string]interface{}) {
 		assertOutput.Equal(len(integrationsMap), 15)
@@ -93,7 +93,7 @@ func TestIntegrationFeatureRollout(t *testing.T) {
 
 func TestIntegrationFeatureTestCampaign(t *testing.T) {
 	assertOutput := assert.New(t)
-	instance := GetVWOInstance("FT_T_100_W_10_20_30_40")
+	instance := GetVWOClientInstance("FT_T_100_W_10_20_30_40")
 
 	instance.Integrations.CallBack = func(integrationsMap map[string]interface{}) {
 		assertOutput.Equal(integrationsMap["fromUserStorageService"], false)
@@ -105,7 +105,7 @@ func TestIntegrationFeatureTestCampaign(t *testing.T) {
 
 	options := make(map[string]interface{})
 	options["variationTargetingVariables"] = map[string]interface{}{"chrome": false}
-	instance = GetVWOInstance("FT_100_W_33_33_33_WS_WW")
+	instance = GetVWOClientInstance("FT_100_W_33_33_33_WS_WW")
 
 	instance.Integrations.CallBack = func(integrationsMap map[string]interface{}) {
 		assertOutput.Equal(integrationsMap["fromUserStorageService"], false)

@@ -59,7 +59,7 @@ const (
 	IncorrectNariationName = "Variation-2"
 	ValidGoal              = "GOAL_2"
 	InvalidGoal            = "NotAvailable"
-	IncorrectURL1          = "https://jsonplaceholder.typicode.com/todos/1"
+	IncorrectURL1          = "https://vwo.com"
 	IncorrectURL2          = "https.com"
 	IncorrectURL3          = "https://github.com/wrong-endpoint/abc"
 	ValidVariableKey1      = "INTEGER_VARIABLE"
