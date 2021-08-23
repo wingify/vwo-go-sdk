@@ -1,6 +1,7 @@
 # VWO GO SDK
 
-[![Build Status](https://img.shields.io/travis/wingify/vwo-go-sdk)](http://travis-ci.org/wingify/vwo-go-sdk)
+[![CI](https://github.com/wingify/vwo-go-sdk/workflows/CI/badge.svg?branch=master)](https://github.com/wingify/vwo-go-sdk/actions?query=workflow%3ACI)
+
 ![Size in Bytes](https://img.shields.io/github/languages/code-size/wingify/vwo-go-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![codecov](https://codecov.io/gh/wingify/vwo-go-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/wingify/vwo-go-sdk)

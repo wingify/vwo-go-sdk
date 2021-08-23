@@ -123,7 +123,7 @@ func WithBatchEventQueue(batchConfig BatchConfig, flushCallBack func(error, []ma
 			batchConfig.SetDefaults()
 		}
 		if !(batchConfig.RequestTimeInterval > 1) {
-			log.Println(fmt.Sprintf(constants.DebugMessageInvalidRequestTimeInterval, constants.BatchMinRequestInterval, constants.BatchDefaultRequestInterval))
+			log.Println(fmt.Sprintf(constants.DebugMessageInvalidRequestTimeInterval, constants.BatchMinRequestInterval, constants.BatchMaxEventsPerRequest, constants.BatchDefaultRequestInterval))
 			batchConfig.SetDefaults()
 		}
 		vwo.BatchEventQueue = schema.BatchEventQueue{
