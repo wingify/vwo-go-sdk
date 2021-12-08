@@ -108,6 +108,7 @@ type Impression struct {
 	R            string  `json:"r"`
 	Tags         string  `json:"tags"`
 	EventType    string  `json:"eventType"`
+	UsageStats	 string  `json:"usageStats"`
 }
 
 // TrackResult struct

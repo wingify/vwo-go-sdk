@@ -46,13 +46,15 @@ func Dispatch(vwoInstance schema.VwoInstance, impression schema.Impression) {
 			"&account_id=" + strconv.Itoa(impression.AccountID) +
 			"&tags=" + impression.Tags +
 			"&env=" + vwoInstance.SettingsFile.SDKKey
+		if impression.UsageStats != "" {
+			URL = URL + impression.UsageStats
+		}
 
 		if vwoInstance.API != "Push" {
 			URL = URL + "&ed=" + impression.ED +
 				"&experiment_id=" + strconv.Itoa(impression.ExperimentID) +
 				"&combination=" + strconv.Itoa(impression.Combination)
 		}
-
 		_, err := utils.GetRequest(URL)
 		logURL := regexp.MustCompile(`(&env=.{32})`).ReplaceAllString(URL, "")
 

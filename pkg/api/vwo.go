@@ -108,11 +108,11 @@ func WithGoalAttributes(goalTypeToTrack interface{}, shouldTrackReturningUser in
 }
 
 func (vwoInstance *VWOInstance) AddToBatch(impression schema.Impression) {
-	vwoInstance.BatchEventQueue.AddToBatch(impression)
+	vwoInstance.BatchEventQueue.AddToBatch(impression, schema.VwoInstance(*vwoInstance))
 }
 
 func (vwoInstance *VWOInstance) FlushEvents() {
-	vwoInstance.BatchEventQueue.FlushBatch()
+	vwoInstance.BatchEventQueue.FlushBatch(schema.VwoInstance(*vwoInstance))
 }
 
 func WithBatchEventQueue(batchConfig BatchConfig, flushCallBack func(error, []map[string]interface{})) VWOOption {

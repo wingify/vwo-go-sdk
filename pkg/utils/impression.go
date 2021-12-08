@@ -116,6 +116,7 @@ func CreateImpressionTrackingUser(vwoInstance schema.VwoInstance, campaignID int
 	impression.ED = `{\"p\":\"` + constants.Platform + `\"}`
 	impression.URL = constants.HTTPSProtocol + constants.EndPointsBaseURL + constants.EndPointsTrackUser
 	impression.EventType = constants.EventsTrackUser
+	impression.UsageStats = schema.GetUsageStatsImpression(vwoInstance)
 
 	message := fmt.Sprintf(constants.DebugMessageImpressionForTrackUser, vwoInstance.API, impression.AccountID, impression.UID, impression.SID, impression.URL, impression.ExperimentID, impression.Combination, impression.ED)
 	LogMessage(vwoInstance.Logger, constants.Debug, impressions, message)

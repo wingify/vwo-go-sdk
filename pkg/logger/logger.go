@@ -194,6 +194,12 @@ func SetLogLevel(lvl int) {
 	fmt.Printf("log level set to %d\n", lvl)
 }
 
+// GetLogLevel function gets log level for logging
+func GetLogLevel() (lvl int){
+	lvl = logLevel 
+	return 
+}
+
 // Close closes all the underlying log writers, which will flush any cached logs.
 // Any errors from closing the underlying log writers will be printed to stderr.
 // Once Close is called, all future calls to the logger will panic.

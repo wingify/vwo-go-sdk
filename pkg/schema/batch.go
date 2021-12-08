@@ -40,7 +40,7 @@ type BatchEventQueue struct {
 	FlushCallBack       func(error, []map[string]interface{})
 }
 
-func (batch *BatchEventQueue) AddToBatch(message Impression) {
+func (batch *BatchEventQueue) AddToBatch(message Impression, vwoInstance VwoInstance) {
 	if batch.cancel == nil {
 		batch.cancel = make(chan bool)
 	}
@@ -54,17 +54,17 @@ func (batch *BatchEventQueue) AddToBatch(message Impression) {
 			for open {
 				select {
 				case <-timer.C:
-					batch.FlushBatch()
+					batch.FlushBatch(vwoInstance)
 					timer.Reset(interval)
 				case data := <-batch.ch:
 					batch.impressions = append(batch.impressions, data)
 					timer.Reset(interval)
 					if len(batch.impressions) >= batch.EventsPerRequest {
-						batch.FlushBatch()
+						batch.FlushBatch(vwoInstance)
 					}
 				case <-batch.cancel:
 					open = false
-					batch.FlushBatch()
+					batch.FlushBatch(vwoInstance)
 				}
 			}
 			timer.Stop()
@@ -75,7 +75,8 @@ func (batch *BatchEventQueue) AddToBatch(message Impression) {
 
 func (batch *BatchEventQueue) Flush() {
 	batch.cancel <- true
-	batch.FlushBatch()
+	var vwoInstance VwoInstance
+	batch.FlushBatch(vwoInstance)
 	if batch.ch != nil {
 		close(batch.ch)
 		batch.ch = nil
@@ -113,7 +114,7 @@ func (batch *BatchEventQueue) getBatchMinifiedPayload(impressions []Impression) 
 	return events
 }
 
-func (batch *BatchEventQueue) FlushBatch() {
+func (batch *BatchEventQueue) FlushBatch(vwoInstance VwoInstance) {
 	defer batch.clear()
 	if batch.IsDevelopmentMode || batch.impressions == nil || len(batch.impressions) == 0 {
 		return
@@ -134,7 +135,9 @@ func (batch *BatchEventQueue) FlushBatch() {
 		"sv":  constants.SDKVersion,
 		"env": batch.SDKKey,
 	}
-
+	for key, element := range GetUsageStatsObject(vwoInstance) {
+		queryParams[key]= element
+    }
 	log.Debug(fmt.Sprintf(constants.DebugBeforeBatchFlush, strconv.Itoa(len(batch.impressions)), strconv.Itoa(batch.AccountID)))
 	_, status, err := request.PostRequest(url, body, headers, queryParams)
 	log.Debug(fmt.Sprintf(constants.DebugAfterBatchFlush, strconv.Itoa(len(batch.impressions))))
