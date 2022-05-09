@@ -35,7 +35,7 @@ type Campaign struct {
 	IsForcedVariation      bool                   `json:"isForcedVariationEnabled"`
 	Key                    string                 `json:"key"`
 	Type                   string                 `json:"type"`
-	isBucketingSeedEnabled bool                   `json:"isBucketingSeedEnabled"`
+	IsBucketingSeedEnabled bool                   `json:"isBucketingSeedEnabled"`
 }
 
 // Goal struct
