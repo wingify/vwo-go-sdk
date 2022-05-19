@@ -41,7 +41,8 @@ func CreateImpressionForPush(vwoInstance schema.VwoInstance, tagKey, tagValue, u
 			schema.Impression: Imression struct with required values
 	*/
 	impression := getCommonProperties(vwoInstance, userID)
-	impression.URL = constants.HTTPSProtocol + constants.EndPointsBaseURL + constants.EndPointsPush
+	UpdatedBaseURL := GetDataLocation(vwoInstance.SettingsFile)
+	impression.URL = constants.HTTPSProtocol + UpdatedBaseURL + constants.EndPointsPush
 
 	impression.Tags = `{"u":{"` + url.QueryEscape(tagKey) + `":"` + url.QueryEscape(tagValue) + `"}}`
 	impression.EventType = constants.EventsPush
@@ -68,8 +69,8 @@ func CreateImpressionTrackingGoal(vwoInstance schema.VwoInstance, variationID in
 
 	impression.ExperimentID = campaignID
 	impression.Combination = variationID
-
-	impression.URL = constants.HTTPSProtocol + constants.EndPointsBaseURL + constants.EndPointsTrackGoal
+	UpdatedBaseURL := GetDataLocation(vwoInstance.SettingsFile)
+	impression.URL = constants.HTTPSProtocol + UpdatedBaseURL + constants.EndPointsTrackGoal
 	impression.GoalID = goalID
 	impression.EventType = constants.EventsTrackGoal
 
@@ -114,7 +115,8 @@ func CreateImpressionTrackingUser(vwoInstance schema.VwoInstance, campaignID int
 	impression.Combination = variationID
 
 	impression.ED = `{\"p\":\"` + constants.Platform + `\"}`
-	impression.URL = constants.HTTPSProtocol + constants.EndPointsBaseURL + constants.EndPointsTrackUser
+	UpdatedBaseURL := GetDataLocation(vwoInstance.SettingsFile)
+	impression.URL = constants.HTTPSProtocol + UpdatedBaseURL + constants.EndPointsTrackUser
 	impression.EventType = constants.EventsTrackUser
 	impression.UsageStats = schema.GetUsageStatsImpression(vwoInstance)
 

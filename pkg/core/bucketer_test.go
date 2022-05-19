@@ -127,7 +127,6 @@ func TestGetBucketValueForUser(t *testing.T) {
 		assert.Equal(t, expected, actual, "Failed for: "+testCase.User)
 	}
 }
-
 func TestHash(t *testing.T) {
 	actual := hash(testdata.GetRandomUser())
 	assert.NotNil(t, actual, "Hash values do not match")

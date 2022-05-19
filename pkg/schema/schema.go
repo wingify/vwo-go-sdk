@@ -18,9 +18,10 @@ package schema
 
 // SettingsFile struct
 type SettingsFile struct {
-	SDKKey    string     `json:"sdkKey"`
-	Campaigns []Campaign `json:"campaigns"`
-	AccountID int        `json:"accountId"`
+	SDKKey           string     `json:"sdkKey"`
+	Campaigns        []Campaign `json:"campaigns"`
+	AccountID        int        `json:"accountId"`
+	CollectionPrefix string     `json:"collectionPrefix"`
 }
 
 // Campaign struct
@@ -116,4 +117,17 @@ type Impression struct {
 type TrackResult struct {
 	CampaignKey string
 	TrackValue  bool
+}
+
+type BatchEventQueue struct {
+	AccountID           int
+	Impressions         []Impression
+	Logger              interface{}
+	Ch                  chan Impression
+	Cancel              chan bool
+	RequestTimeInterval int
+	EventsPerRequest    int
+	SDKKey              string
+	IsDevelopmentMode   bool
+	FlushCallBack       func(error, []map[string]interface{})
 }

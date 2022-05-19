@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package schema
+package utils
 
 import (
 	"fmt"
@@ -25,27 +25,15 @@ import (
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/request"
+	"github.com/wingify/vwo-go-sdk/pkg/schema"
 )
 
-type BatchEventQueue struct {
-	AccountID           int
-	impressions         []Impression
-	Logger              interface{}
-	ch                  chan Impression
-	cancel              chan bool
-	RequestTimeInterval int
-	EventsPerRequest    int
-	SDKKey              string
-	IsDevelopmentMode   bool
-	FlushCallBack       func(error, []map[string]interface{})
-}
-
-func (batch *BatchEventQueue) AddToBatch(message Impression, vwoInstance VwoInstance) {
-	if batch.cancel == nil {
-		batch.cancel = make(chan bool)
+func AddToBatch(message schema.Impression, vwoInstance schema.VwoInstance, batch *schema.BatchEventQueue) {
+	if batch.Cancel == nil {
+		batch.Cancel = make(chan bool)
 	}
-	if batch.ch == nil {
-		batch.ch = make(chan Impression)
+	if batch.Ch == nil {
+		batch.Ch = make(chan schema.Impression)
 		interval := time.Duration(batch.RequestTimeInterval) * time.Second
 
 		go func() {
@@ -54,36 +42,36 @@ func (batch *BatchEventQueue) AddToBatch(message Impression, vwoInstance VwoInst
 			for open {
 				select {
 				case <-timer.C:
-					batch.FlushBatch(vwoInstance)
+					FlushBatch(vwoInstance, batch)
 					timer.Reset(interval)
-				case data := <-batch.ch:
-					batch.impressions = append(batch.impressions, data)
+				case data := <-batch.Ch:
+					batch.Impressions = append(batch.Impressions, data)
 					timer.Reset(interval)
-					if len(batch.impressions) >= batch.EventsPerRequest {
-						batch.FlushBatch(vwoInstance)
+					if len(batch.Impressions) >= batch.EventsPerRequest {
+						FlushBatch(vwoInstance, batch)
 					}
-				case <-batch.cancel:
+				case <-batch.Cancel:
 					open = false
-					batch.FlushBatch(vwoInstance)
+					FlushBatch(vwoInstance, batch)
 				}
 			}
 			timer.Stop()
 		}()
 	}
-	batch.ch <- message
+	batch.Ch <- message
 }
 
-func (batch *BatchEventQueue) Flush() {
-	batch.cancel <- true
-	var vwoInstance VwoInstance
-	batch.FlushBatch(vwoInstance)
-	if batch.ch != nil {
-		close(batch.ch)
-		batch.ch = nil
+func Flush(batch *schema.BatchEventQueue) {
+	batch.Cancel <- true
+	var vwoInstance schema.VwoInstance
+	FlushBatch(vwoInstance, batch)
+	if batch.Ch != nil {
+		close(batch.Ch)
+		batch.Ch = nil
 	}
 }
 
-func (batch *BatchEventQueue) getBatchMinifiedPayload(impressions []Impression) []map[string]interface{} {
+func getBatchMinifiedPayload(impressions []schema.Impression, batch *schema.BatchEventQueue) []map[string]interface{} {
 	eventTypeMapping := constants.EventTypeMapping
 	events := make([]map[string]interface{}, 0)
 	for _, impression := range impressions {
@@ -114,9 +102,9 @@ func (batch *BatchEventQueue) getBatchMinifiedPayload(impressions []Impression) 
 	return events
 }
 
-func (batch *BatchEventQueue) FlushBatch(vwoInstance VwoInstance) {
-	defer batch.clear()
-	if batch.IsDevelopmentMode || batch.impressions == nil || len(batch.impressions) == 0 {
+func FlushBatch(vwoInstance schema.VwoInstance, batch *schema.BatchEventQueue) {
+	defer clear(batch)
+	if batch.IsDevelopmentMode || batch.Impressions == nil || len(batch.Impressions) == 0 {
 		return
 	}
 	log := batch.Logger.(*logger.Logger)
@@ -127,20 +115,21 @@ func (batch *BatchEventQueue) FlushBatch(vwoInstance VwoInstance) {
 	}()
 
 	headers := map[string]string{"Authorization": batch.SDKKey}
-	url := constants.HTTPSProtocol + constants.EndPointsBaseURL + constants.BatchEndPoint
-	body := map[string]interface{}{"ev": batch.getBatchMinifiedPayload(batch.impressions)}
+	UpdatedBaseURL := GetDataLocation(vwoInstance.SettingsFile)
+	url := constants.HTTPSProtocol + UpdatedBaseURL + constants.BatchEndPoint
+	body := map[string]interface{}{"ev": getBatchMinifiedPayload(batch.Impressions, batch)}
 	queryParams := map[string]string{
 		"a":   strconv.Itoa(batch.AccountID),
 		"sd":  constants.SDKName,
 		"sv":  constants.SDKVersion,
 		"env": batch.SDKKey,
 	}
-	for key, element := range GetUsageStatsObject(vwoInstance) {
-		queryParams[key]= element
-    }
-	log.Debug(fmt.Sprintf(constants.DebugBeforeBatchFlush, strconv.Itoa(len(batch.impressions)), strconv.Itoa(batch.AccountID)))
+	for key, element := range schema.GetUsageStatsObject(vwoInstance) {
+		queryParams[key] = element
+	}
+	log.Debug(fmt.Sprintf(constants.DebugBeforeBatchFlush, strconv.Itoa(len(batch.Impressions)), strconv.Itoa(batch.AccountID)))
 	_, status, err := request.PostRequest(url, body, headers, queryParams)
-	log.Debug(fmt.Sprintf(constants.DebugAfterBatchFlush, strconv.Itoa(len(batch.impressions))))
+	log.Debug(fmt.Sprintf(constants.DebugAfterBatchFlush, strconv.Itoa(len(batch.Impressions))))
 	if status == http.StatusOK {
 		log.Info(fmt.Sprintf(constants.InfoBatchImpressionSuccess, constants.BatchEndPoint))
 	} else {
@@ -155,14 +144,14 @@ func (batch *BatchEventQueue) FlushBatch(vwoInstance VwoInstance) {
 	}
 
 	if batch.FlushCallBack != nil {
-		batch.FlushCallBack(err, batch.getBatchMinifiedPayload(batch.impressions))
+		batch.FlushCallBack(err, getBatchMinifiedPayload(batch.Impressions, batch))
 	}
 }
 
-func (batch *BatchEventQueue) clear() {
-	batch.impressions = nil
+func clear(batch *schema.BatchEventQueue) {
+	batch.Impressions = nil
 }
 
-func (batch *BatchEventQueue) GetBatchImpressions() []Impression {
-	return batch.impressions
+func GetBatchImpressions(batch *schema.BatchEventQueue) []schema.Impression {
+	return batch.Impressions
 }
