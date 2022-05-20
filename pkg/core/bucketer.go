@@ -57,7 +57,6 @@ func GetBucketerVariation(vwoInstance schema.VwoInstance, variations []schema.Va
 // GetBucketValueForUser returns Bucket Value of the user by hashing the userId with murmur hash and scaling it down.
 func GetBucketValueForUser(vwoInstance schema.VwoInstance, userID string, maxValue,
 	multiplier float64, campaign schema.Campaign) (uint32, int) {
-	//func GetBucketValueForUser(vwoInstance schema.VwoInstance, userID string, maxValue, multiplier float64) (uint32, int) {
 	/*
 		Args:
 			vwoInstance: vwo Instance for logger implementation

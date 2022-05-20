@@ -123,7 +123,7 @@ func TestGetBucketValueForUser(t *testing.T) {
 
 	for _, testCase := range TestCases {
 		expected := testCase.BucketValue
-		_, actual := GetBucketValueForUser(vwoInstance, testCase.User, 10000, 1)
+		_, actual := GetBucketValueForUser(vwoInstance, testCase.User, 10000, 1, vwoInstance.Campaign)
 		assert.Equal(t, expected, actual, "Failed for: "+testCase.User)
 	}
 }

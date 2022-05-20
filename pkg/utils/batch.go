@@ -71,10 +71,10 @@ func Flush(batch *schema.BatchEventQueue) {
 	}
 }
 
-func getBatchMinifiedPayload(impressions []schema.Impression, batch *schema.BatchEventQueue) []map[string]interface{} {
+func getBatchMinifiedPayload(batch *schema.BatchEventQueue) []map[string]interface{} {
 	eventTypeMapping := constants.EventTypeMapping
 	events := make([]map[string]interface{}, 0)
-	for _, impression := range impressions {
+	for _, impression := range batch.Impressions {
 		event := make(map[string]interface{}, 0)
 		sessionId, _ := strconv.Atoi(impression.SID)
 		event["u"] = impression.U
@@ -117,7 +117,7 @@ func FlushBatch(vwoInstance schema.VwoInstance, batch *schema.BatchEventQueue) {
 	headers := map[string]string{"Authorization": batch.SDKKey}
 	UpdatedBaseURL := GetDataLocation(vwoInstance.SettingsFile)
 	url := constants.HTTPSProtocol + UpdatedBaseURL + constants.BatchEndPoint
-	body := map[string]interface{}{"ev": getBatchMinifiedPayload(batch.Impressions, batch)}
+	body := map[string]interface{}{"ev": getBatchMinifiedPayload(batch)}
 	queryParams := map[string]string{
 		"a":   strconv.Itoa(batch.AccountID),
 		"sd":  constants.SDKName,
@@ -144,7 +144,7 @@ func FlushBatch(vwoInstance schema.VwoInstance, batch *schema.BatchEventQueue) {
 	}
 
 	if batch.FlushCallBack != nil {
-		batch.FlushCallBack(err, getBatchMinifiedPayload(batch.Impressions, batch))
+		batch.FlushCallBack(err, getBatchMinifiedPayload(batch))
 	}
 }
 
