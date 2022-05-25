@@ -24,17 +24,17 @@ import (
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 )
 
-func testGetUrlWithCollectionPrefix(t *testing.T) {
+func testGetUrlWithOutCollectionPrefix(t *testing.T) {
 	var settingsFile schema.SettingsFile
 	BaseUrlAchieved := GetDataLocation(settingsFile)
 	BaseUrl := constants.BaseURL
 	assert.Equal(t, BaseUrlAchieved, BaseUrl, "BaseUrl not matched when collection prefix is empty")
 }
 
-func testGetUrlWithOutCollectionPrefix(t *testing.T) {
+func testGetUrlWithCollectionPrefix(t *testing.T) {
 	var settingsFile schema.SettingsFile
 	settingsFile.CollectionPrefix = "eu"
 	BaseUrlAchieved := GetDataLocation(settingsFile)
-	BaseUrl := constants.BaseURL
+	BaseUrl := constants.BaseURL + "/" + settingsFile.CollectionPrefix
 	assert.Equal(t, BaseUrlAchieved, BaseUrl, "BaseUrl not matched when collection prefix is set to eu")
 }
