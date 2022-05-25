@@ -127,6 +127,39 @@ func TestGetBucketValueForUser(t *testing.T) {
 		assert.Equal(t, expected, actual, "Failed for: "+testCase.User)
 	}
 }
+
+func GetBucketValueForUser1(t *testing.T) {
+	var campaign schema.Campaign
+	var vwoInstance schema.VwoInstance
+	campaign.ID = 1
+	campaign.IsBucketingSeedEnabled = true
+	userID := "someone@mail.com"
+	ExpectedBucketVal := 2444
+	_, CalculatedVal := GetBucketValueForUser(vwoInstance, userID, 10000, 1, campaign)
+	assert.Equal(t, ExpectedBucketVal, CalculatedVal, "Failed when userID is "+userID+" and bucketing seed is true")
+
+	campaign.IsBucketingSeedEnabled = false
+	ExpectedBucketVal = 6361
+	_, CalculatedVal = GetBucketValueForUser(vwoInstance, userID, 10000, 1, campaign)
+	assert.Equal(t, ExpectedBucketVal, CalculatedVal, "Failed when userID is "+userID+" and bucketing seed is false")
+}
+
+func GetBucketValueForUser1111111111111111(t *testing.T) {
+	var campaign schema.Campaign
+	var vwoInstance schema.VwoInstance
+	campaign.ID = 1
+	campaign.IsBucketingSeedEnabled = true
+	userID := "1111111111111111"
+	ExpectedBucketVal := 8177
+	_, CalculatedVal := GetBucketValueForUser(vwoInstance, userID, 10000, 1, campaign)
+	assert.Equal(t, ExpectedBucketVal, CalculatedVal, "Failed when userID is "+userID+" and bucketing seed is true")
+
+	campaign.IsBucketingSeedEnabled = false
+	ExpectedBucketVal = 4987
+	_, CalculatedVal = GetBucketValueForUser(vwoInstance, userID, 10000, 1, campaign)
+	assert.Equal(t, ExpectedBucketVal, CalculatedVal, "Failed when userID is "+userID+" and bucketing seed is false")
+}
+
 func TestHash(t *testing.T) {
 	actual := hash(testdata.GetRandomUser())
 	assert.NotNil(t, actual, "Hash values do not match")
