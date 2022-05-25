@@ -18,6 +18,11 @@ package tests
 
 import (
 	"bytes"
+	"io/ioutil"
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-go-sdk/pkg/api"
 	"github.com/wingify/vwo-go-sdk/pkg/mocks"
@@ -25,10 +30,6 @@ import (
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/testdata"
 	"github.com/wingify/vwo-go-sdk/pkg/utils"
-	"io/ioutil"
-	"net/http"
-	"testing"
-	"time"
 )
 
 func init() {
@@ -60,6 +61,7 @@ func GetVWOInstance(batchSize int, batchInterval int) api.VWOInstance {
 }
 
 func TestEnqueueAndFlushEvents(t *testing.T) {
+	var batch *schema.BatchEventQueue
 	assertOutput := assert.New(t)
 	batchSize, batchInterval := 10, 5
 	instance := GetVWOInstance(batchSize, batchInterval)
@@ -70,13 +72,14 @@ func TestEnqueueAndFlushEvents(t *testing.T) {
 	userID, campaignKey := testdata.GetRandomUser(), "AB_T_100_W_33_33_33"
 
 	instance.Activate(campaignKey, userID, nil)
-	assertOutput.Equal(len(instance.BatchEventQueue.GetBatchImpressions()), 1)
+	assertOutput.Equal(len(utils.GetBatchImpressions(batch)), 1)
 	instance.FlushEvents()
 
-	assertOutput.Nil(instance.BatchEventQueue.GetBatchImpressions())
+	assertOutput.Nil(utils.GetBatchImpressions(batch))
 }
 
 func TestFlushQueueOnMaxEvents(t *testing.T) {
+	var batch *schema.BatchEventQueue
 	assertOutput := assert.New(t)
 	batchSize, batchInterval := 10, 5
 	instance := GetVWOInstance(batchSize, batchInterval)
@@ -90,10 +93,11 @@ func TestFlushQueueOnMaxEvents(t *testing.T) {
 		instance.Track(campaignKey, userID, goalIdentifier, nil)
 	}
 	time.Sleep(time.Duration(1) * time.Second)
-	assertOutput.Nil(instance.BatchEventQueue.GetBatchImpressions())
+	assertOutput.Nil(utils.GetBatchImpressions(batch))
 }
 
 func TestFlushQueueOnTimerExpire(t *testing.T) {
+	var batch *schema.BatchEventQueue
 	assertOutput := assert.New(t)
 	batchSize, batchInterval := 10, 2
 	instance := GetVWOInstance(batchSize, batchInterval)
@@ -106,7 +110,7 @@ func TestFlushQueueOnTimerExpire(t *testing.T) {
 	for i := 0; i < batchSize-1; i++ {
 		instance.Push(testdata.ValidTagKey, testdata.ValidTagValue, userID)
 	}
-	assertOutput.Equal(len(instance.BatchEventQueue.GetBatchImpressions()), batchSize-1)
+	assertOutput.Equal(len(utils.GetBatchImpressions(batch)), batchSize-1)
 	time.Sleep(time.Duration(batchInterval+1) * time.Second)
-	assertOutput.Nil(instance.BatchEventQueue.GetBatchImpressions())
+	assertOutput.Nil(utils.GetBatchImpressions(batch))
 }
