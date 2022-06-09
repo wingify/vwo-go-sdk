@@ -123,16 +123,3 @@ type TrackResult struct {
 	CampaignKey string
 	TrackValue  bool
 }
-
-type BatchEventQueue struct {
-	AccountID           int
-	Impressions         []Impression
-	Logger              interface{}
-	Ch                  chan Impression
-	Cancel              chan bool
-	RequestTimeInterval int
-	EventsPerRequest    int
-	SDKKey              string
-	IsDevelopmentMode   bool
-	FlushCallBack       func(error, []map[string]interface{})
-}

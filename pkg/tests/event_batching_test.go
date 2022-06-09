@@ -61,7 +61,6 @@ func GetVWOInstance(batchSize int, batchInterval int) api.VWOInstance {
 }
 
 func TestEnqueueAndFlushEvents(t *testing.T) {
-	var batch *schema.BatchEventQueue
 	assertOutput := assert.New(t)
 	batchSize, batchInterval := 10, 5
 	instance := GetVWOInstance(batchSize, batchInterval)
@@ -72,14 +71,13 @@ func TestEnqueueAndFlushEvents(t *testing.T) {
 	userID, campaignKey := testdata.GetRandomUser(), "AB_T_100_W_33_33_33"
 
 	instance.Activate(campaignKey, userID, nil)
-	assertOutput.Equal(len(utils.GetBatchImpressions(batch)), 1)
+	assertOutput.Equal(len(instance.BatchEventQueue.GetBatchImpressions()), 1)
 	instance.FlushEvents()
 
-	assertOutput.Nil(utils.GetBatchImpressions(batch))
+	assertOutput.Nil(instance.BatchEventQueue.GetBatchImpressions())
 }
 
 func TestFlushQueueOnMaxEvents(t *testing.T) {
-	var batch *schema.BatchEventQueue
 	assertOutput := assert.New(t)
 	batchSize, batchInterval := 10, 5
 	instance := GetVWOInstance(batchSize, batchInterval)
@@ -93,11 +91,10 @@ func TestFlushQueueOnMaxEvents(t *testing.T) {
 		instance.Track(campaignKey, userID, goalIdentifier, nil)
 	}
 	time.Sleep(time.Duration(1) * time.Second)
-	assertOutput.Nil(utils.GetBatchImpressions(batch))
+	assertOutput.Nil(instance.BatchEventQueue.GetBatchImpressions())
 }
 
 func TestFlushQueueOnTimerExpire(t *testing.T) {
-	var batch *schema.BatchEventQueue
 	assertOutput := assert.New(t)
 	batchSize, batchInterval := 10, 2
 	instance := GetVWOInstance(batchSize, batchInterval)
@@ -110,7 +107,7 @@ func TestFlushQueueOnTimerExpire(t *testing.T) {
 	for i := 0; i < batchSize-1; i++ {
 		instance.Push(testdata.ValidTagKey, testdata.ValidTagValue, userID)
 	}
-	assertOutput.Equal(len(utils.GetBatchImpressions(batch)), batchSize-1)
+	assertOutput.Equal(len(instance.BatchEventQueue.GetBatchImpressions()), batchSize-1)
 	time.Sleep(time.Duration(batchInterval+1) * time.Second)
-	assertOutput.Nil(utils.GetBatchImpressions(batch))
+	assertOutput.Nil(instance.BatchEventQueue.GetBatchImpressions())
 }

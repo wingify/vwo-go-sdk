@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package utils
+package schema
 
 import (
 	"fmt"
@@ -25,15 +24,27 @@ import (
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/request"
-	"github.com/wingify/vwo-go-sdk/pkg/schema"
 )
 
-func AddToBatch(message schema.Impression, vwoInstance schema.VwoInstance, batch *schema.BatchEventQueue) {
-	if batch.Cancel == nil {
-		batch.Cancel = make(chan bool)
+type BatchEventQueue struct {
+	AccountID           int
+	impressions         []Impression
+	Logger              interface{}
+	ch                  chan Impression
+	cancel              chan bool
+	RequestTimeInterval int
+	EventsPerRequest    int
+	SDKKey              string
+	IsDevelopmentMode   bool
+	FlushCallBack       func(error, []map[string]interface{})
+}
+
+func (batch *BatchEventQueue) AddToBatch(message Impression, vwoInstance VwoInstance) {
+	if batch.cancel == nil {
+		batch.cancel = make(chan bool)
 	}
-	if batch.Ch == nil {
-		batch.Ch = make(chan schema.Impression)
+	if batch.ch == nil {
+		batch.ch = make(chan Impression)
 		interval := time.Duration(batch.RequestTimeInterval) * time.Second
 
 		go func() {
@@ -42,39 +53,39 @@ func AddToBatch(message schema.Impression, vwoInstance schema.VwoInstance, batch
 			for open {
 				select {
 				case <-timer.C:
-					FlushBatch(vwoInstance, batch)
+					batch.FlushBatch(vwoInstance)
 					timer.Reset(interval)
-				case data := <-batch.Ch:
-					batch.Impressions = append(batch.Impressions, data)
+				case data := <-batch.ch:
+					batch.impressions = append(batch.impressions, data)
 					timer.Reset(interval)
-					if len(batch.Impressions) >= batch.EventsPerRequest {
-						FlushBatch(vwoInstance, batch)
+					if len(batch.impressions) >= batch.EventsPerRequest {
+						batch.FlushBatch(vwoInstance)
 					}
-				case <-batch.Cancel:
+				case <-batch.cancel:
 					open = false
-					FlushBatch(vwoInstance, batch)
+					batch.FlushBatch(vwoInstance)
 				}
 			}
 			timer.Stop()
 		}()
 	}
-	batch.Ch <- message
+	batch.ch <- message
 }
 
-func Flush(batch *schema.BatchEventQueue) {
-	batch.Cancel <- true
-	var vwoInstance schema.VwoInstance
-	FlushBatch(vwoInstance, batch)
-	if batch.Ch != nil {
-		close(batch.Ch)
-		batch.Ch = nil
+func (batch *BatchEventQueue) Flush() {
+	batch.cancel <- true
+	var vwoInstance VwoInstance
+	batch.FlushBatch(vwoInstance)
+	if batch.ch != nil {
+		close(batch.ch)
+		batch.ch = nil
 	}
 }
 
-func getBatchMinifiedPayload(batch *schema.BatchEventQueue) []map[string]interface{} {
+func (batch *BatchEventQueue) getBatchMinifiedPayload(impressions []Impression) []map[string]interface{} {
 	eventTypeMapping := constants.EventTypeMapping
 	events := make([]map[string]interface{}, 0)
-	for _, impression := range batch.Impressions {
+	for _, impression := range impressions {
 		event := make(map[string]interface{}, 0)
 		sessionId, _ := strconv.Atoi(impression.SID)
 		event["u"] = impression.U
@@ -102,9 +113,9 @@ func getBatchMinifiedPayload(batch *schema.BatchEventQueue) []map[string]interfa
 	return events
 }
 
-func FlushBatch(vwoInstance schema.VwoInstance, batch *schema.BatchEventQueue) {
-	defer clear(batch)
-	if batch.IsDevelopmentMode || batch.Impressions == nil || len(batch.Impressions) == 0 {
+func (batch *BatchEventQueue) FlushBatch(vwoInstance VwoInstance) {
+	defer batch.clear()
+	if batch.IsDevelopmentMode || batch.impressions == nil || len(batch.impressions) == 0 {
 		return
 	}
 	log := batch.Logger.(*logger.Logger)
@@ -115,21 +126,23 @@ func FlushBatch(vwoInstance schema.VwoInstance, batch *schema.BatchEventQueue) {
 	}()
 
 	headers := map[string]string{"Authorization": batch.SDKKey}
+
 	UpdatedBaseURL := GetDataLocation(vwoInstance.SettingsFile)
+
 	url := constants.HTTPSProtocol + UpdatedBaseURL + constants.BatchEndPoint
-	body := map[string]interface{}{"ev": getBatchMinifiedPayload(batch)}
+	body := map[string]interface{}{"ev": batch.getBatchMinifiedPayload(batch.impressions)}
 	queryParams := map[string]string{
 		"a":   strconv.Itoa(batch.AccountID),
 		"sd":  constants.SDKName,
 		"sv":  constants.SDKVersion,
 		"env": batch.SDKKey,
 	}
-	for key, element := range schema.GetUsageStatsObject(vwoInstance) {
+	for key, element := range GetUsageStatsObject(vwoInstance) {
 		queryParams[key] = element
 	}
-	log.Debug(fmt.Sprintf(constants.DebugBeforeBatchFlush, strconv.Itoa(len(batch.Impressions)), strconv.Itoa(batch.AccountID)))
+	log.Debug(fmt.Sprintf(constants.DebugBeforeBatchFlush, strconv.Itoa(len(batch.impressions)), strconv.Itoa(batch.AccountID)))
 	_, status, err := request.PostRequest(url, body, headers, queryParams)
-	log.Debug(fmt.Sprintf(constants.DebugAfterBatchFlush, strconv.Itoa(len(batch.Impressions))))
+	log.Debug(fmt.Sprintf(constants.DebugAfterBatchFlush, strconv.Itoa(len(batch.impressions))))
 	if status == http.StatusOK {
 		log.Info(fmt.Sprintf(constants.InfoBatchImpressionSuccess, constants.BatchEndPoint))
 	} else {
@@ -144,14 +157,30 @@ func FlushBatch(vwoInstance schema.VwoInstance, batch *schema.BatchEventQueue) {
 	}
 
 	if batch.FlushCallBack != nil {
-		batch.FlushCallBack(err, getBatchMinifiedPayload(batch))
+		batch.FlushCallBack(err, batch.getBatchMinifiedPayload(batch.impressions))
 	}
 }
 
-func clear(batch *schema.BatchEventQueue) {
-	batch.Impressions = nil
+func (batch *BatchEventQueue) clear() {
+	batch.impressions = nil
 }
 
-func GetBatchImpressions(batch *schema.BatchEventQueue) []schema.Impression {
-	return batch.Impressions
+func (batch *BatchEventQueue) GetBatchImpressions() []Impression {
+	return batch.impressions
+}
+
+// GetDataLOcation modifies the baseUrl location if user wants to use the Europe account
+func GetDataLocation(SettingsFile SettingsFile) string {
+	/*
+		Args:
+			SettingsFile: schema of the settings file to check if collection prefix is not empty
+
+		Returns:
+			string: the updated base url
+	*/
+	CurrentBaseURL := constants.BaseURL
+	if SettingsFile.CollectionPrefix != "" {
+		CurrentBaseURL = CurrentBaseURL + "/" + SettingsFile.CollectionPrefix
+	}
+	return CurrentBaseURL
 }
