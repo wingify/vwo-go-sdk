@@ -21,7 +21,15 @@ import (
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 )
 
+// GetDataLOcation modifies the baseUrl location if user wants to use the Europe account
 func GetDataLocation(SettingsFile schema.SettingsFile) string {
+	/*
+		Args:
+			SettingsFile: schema of the settings file to check if collection prefix is not empty
+
+		Returns:
+			string: the updated base url
+	*/
 	CurrentBaseURL := constants.BaseURL
 	if SettingsFile.CollectionPrefix != "" {
 		CurrentBaseURL = CurrentBaseURL + "/" + SettingsFile.CollectionPrefix

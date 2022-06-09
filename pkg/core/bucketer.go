@@ -137,3 +137,61 @@ func hash(s string) uint32 {
 	hasher.Write([]byte(s))
 	return hasher.Sum32()
 }
+
+// addRangesToVariations function helps to calculate range of every variation
+func addRangesToVariations(variations []schema.Variation) []schema.Variation {
+	/*
+		Args:
+			variations : array of type schema.Variation
+		Return:
+			variations : array of type schema.Variation after adding ranges for every variation in the array passed
+	*/
+	offset := 0
+	for i := range variations {
+		limit := int(math.Floor(variations[i].Weight * constants.MaxTrafficValue / 100))
+		maxRange := offset + limit
+		variations[i].StartVariationAllocation = offset + 1
+		variations[i].EndVariationAllocation = maxRange
+		offset = maxRange
+	}
+	return variations
+}
+
+// addRangesToCampaigns function helps to calculate range of every campaign
+func addRangesToCampaigns(campaigns []schema.Campaign) []schema.Campaign {
+	/*
+		Args:
+			campaigns : array of type schema.Campaign
+		Return:
+			campaigns : array of type schema.Campaign after adding ranges for every Campaign in the array passed
+	*/
+	offset := 0
+	for i := range campaigns {
+		limit := int(math.Floor(campaigns[i].Weight * constants.MaxTrafficValue / 100))
+		maxRange := offset + limit
+		campaigns[i].MaxRange = offset + 1
+		campaigns[i].MinRange = maxRange
+		offset = maxRange
+	}
+	return campaigns
+}
+
+// getCamapignsUsingRange function Returns a campaign by checking the Start and End Bucket Allocations of each campaign.
+func getCampaignUsingRange(rangeForCampaigns int, campaigns []schema.Campaign) (schema.Campaign, error) {
+	/*
+		Args:
+			rangeForCampaigns : the bucket value of the user
+			campaigns         : array of campaigns of type schema.campaign
+		Return:
+			if ranges of the campaign are well within the bucket value --> correspoding campaign
+			else -->nil
+	*/
+	rangeForCampaigns = rangeForCampaigns * constants.MaxTrafficValue
+	for i := range campaigns {
+		if campaigns[i].MaxRange != 0 && campaigns[i].MaxRange >= rangeForCampaigns && campaigns[i].MinRange <= rangeForCampaigns {
+			return campaigns[i], nil
+		}
+	}
+	return schema.Campaign{}, nil //to add some error message
+	//fmt.Errorf(constants.ErrorMessageNoVariationForBucketValue, vwoInstance.API, userID, campaignKey, bucketValue)
+}

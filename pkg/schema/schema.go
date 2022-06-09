@@ -18,10 +18,12 @@ package schema
 
 // SettingsFile struct
 type SettingsFile struct {
-	SDKKey           string     `json:"sdkKey"`
-	Campaigns        []Campaign `json:"campaigns"`
-	AccountID        int        `json:"accountId"`
-	CollectionPrefix string     `json:"collectionPrefix"`
+	SDKKey           string                         `json:"sdkKey"`
+	Campaigns        []Campaign                     `json:"campaigns"`
+	AccountID        int                            `json:"accountId"`
+	CollectionPrefix string                         `json:"collectionPrefix"`
+	CampaignGroups   map[int]int                    `json:"campaignGroups"`
+	Groups           map[int]map[string]interface{} `json:"groups"`
 }
 
 // Campaign struct
@@ -37,6 +39,9 @@ type Campaign struct {
 	Key                    string                 `json:"key"`
 	Type                   string                 `json:"type"`
 	IsBucketingSeedEnabled bool                   `json:"isBucketingSeedEnabled"`
+	Weight                 float64
+	MinRange               int
+	MaxRange               int
 }
 
 // Goal struct

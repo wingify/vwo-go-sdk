@@ -24,7 +24,10 @@ import (
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 )
 
-const campaign = "campaign.go"
+const (
+	campaign = "campaign.go"
+	Running  = "RUNNING"
+)
 
 // GetVariationAllocationRanges returns list of variation with set allocation ranges.
 func GetVariationAllocationRanges(vwoInstance schema.VwoInstance, variations []schema.Variation) []schema.Variation {
@@ -94,7 +97,7 @@ func GetCampaign(API string, settingsFile schema.SettingsFile, campaignKey strin
 }
 
 // GetCampaignForKeys function returns list of campaigns from the settings file that are in the list of CampaignKeys
-func GetCampaignForKeys(vwoInstance schema.VwoInstance, campaignKeys []string) ([]schema.Campaign, error){
+func GetCampaignForKeys(vwoInstance schema.VwoInstance, campaignKeys []string) ([]schema.Campaign, error) {
 	/*
 		Args:
 			settingsFile  : Settings file for the project
@@ -121,7 +124,7 @@ func GetCampaignForKeys(vwoInstance schema.VwoInstance, campaignKeys []string) (
 }
 
 // GetCampaignForGoals function returns list of campaigns from the settings file that are in the list of CampaignKeys
-func GetCampaignForGoals(vwoInstance schema.VwoInstance, goalIdentifier, goalTypeToTrack string) ([]schema.Campaign, error){
+func GetCampaignForGoals(vwoInstance schema.VwoInstance, goalIdentifier, goalTypeToTrack string) ([]schema.Campaign, error) {
 	/*
 		Args:
 			settingsFile  : Settings file for the project
@@ -150,8 +153,6 @@ func GetCampaignForGoals(vwoInstance schema.VwoInstance, goalIdentifier, goalTyp
 	return Campaigns, nil
 }
 
-
-
 // ScaleVariations function It extracts the weights from all the variations inside the
 // campaign and scales them so that the total sum of eligible variations weights become 100%
 func ScaleVariations(variations []schema.Variation) []schema.Variation {
@@ -177,6 +178,23 @@ func ScaleVariations(variations []schema.Variation) []schema.Variation {
 		}
 	}
 	return variations
+}
+
+// ScaleCampaigns extracts the weights from all the campaigns and scales them so that the
+// total sum of eligible campaigns' weights become 100%.
+func ScaleCampaigns(campaigns []schema.Campaign) []schema.Campaign {
+	/*
+		Args:
+			campaigns  : List of campaigns(schema.Campaign) having weight as a property
+
+		Return:
+			campaigns  : List of campaigns(schema.Campaigns) after scaling
+	*/
+	normalizedWeight := 100 / float64(len(campaigns))
+	for i := range campaigns {
+		campaigns[i].Weight = normalizedWeight
+	}
+	return campaigns
 }
 
 // GetCampaignGoal returns goal from given campaign and goal identifier.
@@ -250,4 +268,58 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// isPartOfGroup function checks whether the called campaign is a part of group or not
+func IsPartOfGroup(settingsFile schema.SettingsFile, campaign schema.Campaign) bool {
+	/*
+		Args:
+			settingsFile  : settingsFile for the project
+			campaign      : the schema of the called campaign
+		Return:
+			bool stating whether the campaign is part of group or not.
+	*/
+	if len(settingsFile.CampaignGroups) != 0 {
+		// _ will receive either the value of key(here key is campaign.ID) from the map or a "zero value"
+		//and exists will receive a bool that will be set to true if key was actually present in the map
+		_, exists := settingsFile.CampaignGroups[campaign.ID]
+		if exists {
+			return true
+		}
+	}
+	return false
+}
+
+// getGroupCampaigns function returns all the campaigns which are part of the given group using groupID
+func GetGroupCampaigns(settingsFile schema.SettingsFile, groupID int) []schema.Campaign {
+	/*
+		Args:
+			settingsFile  : Settings file for the project
+			groupID       : id of group whose campaigns are to be returned
+		Return:
+			array of campaigns lying in the groups having the groupID
+	*/
+	var groupCampaignIds []int
+	var groupCampaigns []schema.Campaign
+	Groups := settingsFile.Groups
+
+	if len(Groups) != 0 {
+		// _ will receive either the value of key(here key is groupID) from the map or a "zero value"
+		//and exists will receive a bool that will be set to true if key was actually present in the map
+		_, exists := Groups[groupID]
+		if exists {
+			groupCampaignIds = (Groups[groupID]["campaigns"]).([]int)
+		}
+	}
+	if len(groupCampaignIds) > 0 {
+		for i := range groupCampaignIds {
+			for j := range settingsFile.Campaigns {
+				currentCampaign := settingsFile.Campaigns[j]
+				if currentCampaign.ID == groupCampaignIds[i] && currentCampaign.Status == Running {
+					groupCampaigns = append(groupCampaigns, currentCampaign)
+				}
+			}
+		}
+	}
+	return groupCampaigns
 }

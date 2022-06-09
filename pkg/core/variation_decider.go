@@ -44,7 +44,8 @@ type VariationDecider struct {
     5. If user becomes part of campaign assign a variation.
 	6. Store the variation found in the user_storage
 */
-func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema.Campaign, goalIdentifier string, options schema.Options) (schema.Variation, string, error) {
+func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema.Campaign,
+	goalIdentifier string, options schema.Options) (schema.Variation, string, error) {
 	/*
 		Args:
 			userId: the unique ID assigned to User
@@ -67,6 +68,16 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 			options.VariationTargetingVariables = make(map[string]interface{})
 		}
 		options.VariationTargetingVariables["_vwo_user_id"] = userID
+	}
+
+	isCampaignPartOfGroup := utils.IsPartOfGroup(settingsFile, campaign)
+
+	if isCampaignPartOfGroup {
+		campaignID := campaign.ID
+		groupID := settingsFile.CampaignGroups[campaignID]
+		integrationsMap["groupId"] = groupID
+		groupName := settingsFile.Groups[groupID]["name"]
+		integrationsMap["groupName"] = groupName
 	}
 
 	targettedVariation, err := FindTargetedVariation(vwoInstance, userID, campaign, options)
@@ -303,4 +314,128 @@ func getIntegrationsMap(vwoInstance schema.VwoInstance, campaign schema.Campaign
 	integrationsMap["vwoUserId"] = utils.GenerateFor(vwoInstance, userID, vwoInstance.SettingsFile.AccountID)
 
 	return integrationsMap
+}
+
+// DoesCampaignExists funtion checks whether a particular value is present in an array of values or not
+func DoesCampaignExists(eligibleCampaigns []schema.Campaign, campaignToCheck schema.Campaign) bool {
+	/*
+		Args:
+			eligibleCampaigns  : campaigns part of group which were eligible to be winner
+			campaignToCheck    :   campaign to be checked whether it exists in array of eligibleCampaigns or not
+		Return:
+			result : bool value specifying whether value exists or not
+	*/
+	result := false
+	for i := range eligibleCampaigns {
+		if campaignToCheck.ID == eligibleCampaigns[i].ID {
+			result = true
+			break
+		}
+	}
+	return result
+}
+
+// GetEligbleCampagins finds and returns all the eligible campaigns from groupCampaigns
+func GetEligibleCampaigns(userID string, groupCampaigns []schema.Campaign,
+	calledCampaign schema.Campaign, vwoInstance schema.VwoInstance, segments map[string]interface{}, options schema.Options) []schema.Campaign {
+	/*
+		Args:
+				userID:           the unique ID assigned to the user
+				groupCampaigns:   campaigns part of group
+				calledCampaign:   campaign for which api is called
+				options:		  options object containing CustomVariables, VariationTargertting variables and Revenue Goal
+		Return:
+				eliibleCampaigns: eligible campaigns from which winner campaign is to be selected
+	*/
+	var eligibleCampaigns []schema.Campaign
+	for _, campaign := range groupCampaigns {
+		if calledCampaign.ID == campaign.ID || EvaluateSegment(vwoInstance, segments, options) && IsUserPartOfCampaign(vwoInstance, userID, calledCampaign) {
+			eligibleCampaigns = append(eligibleCampaigns, campaign)
+		}
+	}
+	return eligibleCampaigns
+}
+
+// FindWinnerCampaign finds and returns the winner campaign from eligiblecampaigns list of campaigns
+func FindWinnerCampaign(userID string, elgibleCampaigns []schema.Campaign) schema.Campaign {
+	/*
+		Args:
+			userID     		  : the unique ID assigned to User
+			eligibleCampaigns : campaigns part of group which were eligible to be winner
+		Return:
+			campaign if winner can be obtained
+			nil if not
+	*/
+	if len(elgibleCampaigns) == 1 {
+		return elgibleCampaigns[0]
+	}
+
+	//Scale the traffic percent of each campaign
+	eligibleCampaigns := utils.ScaleCampaigns(elgibleCampaigns)
+	//Allocate new range for campaigns
+	eligibleCampaigns = addRangesToCampaigns(eligibleCampaigns)
+	//Now retrieve the campaign from the modified_campaign_for_whitelisting
+	_, bucketVal := GetBucketValueForUser(schema.VwoInstance{}, userID, constants.MaxTrafficValue, 1, schema.Campaign{})
+	CampaignObtained, err := getCampaignUsingRange(bucketVal, eligibleCampaigns)
+	if err != nil {
+		return schema.Campaign{}
+	}
+	return CampaignObtained
+}
+
+// GetEligibleCampaignsKey finds and returns all the keys of all the eligibleCampaigns
+func GetEligibleCampaignsKey(eligibleCampaigns []schema.Campaign) []string {
+	/*
+		Args:
+			eligibleCampaigns    : campaigns part of group which were eligible to be winner
+		Return:
+			eligibleCampaignKeys : array of strings of the keys of all eligible campaigns
+	*/
+	var eligibleCampaignKeys []string
+	for i := range eligibleCampaigns {
+		eligibleCampaignKeys = append(eligibleCampaignKeys, eligibleCampaigns[i].Key)
+	}
+	return eligibleCampaignKeys
+}
+
+// GetNonEligibleCampaignsKey function gets campaign keys of all non eligibleCampaigns
+func GetNonEligibleCampaignsKey(eligibleCampaigns []schema.Campaign, groupCampaigns []schema.Campaign) []string {
+	/*
+		Args:
+			eligibleCampaigns  : campaigns part of group which were eligible to be winner
+			groupCampaigns     :   campaigns part of group
+		Return:
+			NonEligibleCampaignsName : array of strings which are keys of all the non eligible campaigns
+	*/
+	var NonEligibleCampaignsName []string
+	for i := range groupCampaigns {
+		if !DoesCampaignExists(eligibleCampaigns, groupCampaigns[i]) {
+			NonEligibleCampaignsName = append(NonEligibleCampaignsName, groupCampaigns[i].Key)
+		}
+	}
+	return NonEligibleCampaignsName
+}
+
+func CheckWhitelistingOrStorageForGroupedCampaigns(userStorageObj schema.UserData, userID string, calledCampaign schema.Campaign,
+	groupCampaigns []schema.Campaign, groupName string, options schema.Options, vwoInstance schema.VwoInstance) bool {
+	for i := range groupCampaigns {
+		if calledCampaign.ID != groupCampaigns[i].ID {
+			targettedVariation := GetWhiteListedVariationsList(vwoInstance, userID, groupCampaigns[i], options)
+			if len(targettedVariation) != 0 {
+				//log message stating that other campaigns satisfy the whitelisting storage
+				return true
+			}
+		}
+	}
+
+	for i := range groupCampaigns {
+		if calledCampaign.ID != groupCampaigns[i].ID {
+			userStorageVariation, _ := GetVariationFromUserStorage(vwoInstance, userID, groupCampaigns[i])
+			if userStorageVariation != "" {
+				//log message stating that other campaigns satisfy the user storage
+				return true
+			}
+		}
+	}
+	return false
 }
