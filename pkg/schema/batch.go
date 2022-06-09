@@ -127,7 +127,10 @@ func (batch *BatchEventQueue) FlushBatch(vwoInstance VwoInstance) {
 
 	headers := map[string]string{"Authorization": batch.SDKKey}
 
-	UpdatedBaseURL := GetDataLocation(vwoInstance.SettingsFile)
+	UpdatedBaseURL := constants.BaseURL
+	if vwoInstance.SettingsFile.CollectionPrefix != "" {
+		UpdatedBaseURL = UpdatedBaseURL + "/" + vwoInstance.SettingsFile.CollectionPrefix
+	}
 
 	url := constants.HTTPSProtocol + UpdatedBaseURL + constants.BatchEndPoint
 	body := map[string]interface{}{"ev": batch.getBatchMinifiedPayload(batch.impressions)}
@@ -167,20 +170,4 @@ func (batch *BatchEventQueue) clear() {
 
 func (batch *BatchEventQueue) GetBatchImpressions() []Impression {
 	return batch.impressions
-}
-
-// GetDataLOcation modifies the baseUrl location if user wants to use the Europe account
-func GetDataLocation(SettingsFile SettingsFile) string {
-	/*
-		Args:
-			SettingsFile: schema of the settings file to check if collection prefix is not empty
-
-		Returns:
-			string: the updated base url
-	*/
-	CurrentBaseURL := constants.BaseURL
-	if SettingsFile.CollectionPrefix != "" {
-		CurrentBaseURL = CurrentBaseURL + "/" + SettingsFile.CollectionPrefix
-	}
-	return CurrentBaseURL
 }
