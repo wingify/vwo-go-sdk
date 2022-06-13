@@ -34,15 +34,28 @@ type VariationDecider struct {
 }
 
 // GetVariation function
-/*	Returns variation for the user for given campaign
-    This method achieves the variation assignment in the following way:
-    1. First get variation from UserStorage, if variation is found in user_storage_data,
-    return from there
-    2. Evaluates white listing users for each variation, and find a targeted variation.
-    3. If no targeted variation is found, evaluate pre-segmentation result
-    4. Evaluate percent traffic
-    5. If user becomes part of campaign assign a variation.
-	6. Store the variation found in the user_storage
+
+/* Returns variation for the user for given campaign
+This method achieves the variation assignment in the following way:
+If campaign is part of any group, the winner is found in the following way:
+1. Check whitelisting for called campaign, if passed return targeted variation.
+2. Check user storage for called campaign, if passed return stored variation.
+3. Check presegmentation and traffic allocation for called campaign, if passed then
+	check whitelisting and user storage for other campaigns of same group if any
+	campaign passes return None else find eligible campaigns
+4. Find winner campaign from eligible campaigns and if winner campaign is same as
+	called campaign return bucketed variation and store variation in user storage,
+	however if winner campaign is not called campaign return None
+
+However if campaign is not part of any group, then this method achieves the variation
+assignment in the following way:
+1. First get variation from UserStorage, if variation is found in user_storage_data,
+	return from there
+2. Evaluates white listing users for each variation, and find a targeted variation.
+3. If no targeted variation is found, evaluate pre-segmentation result
+4. Evaluate percent traffic
+5. If user becomes part of campaign assign a variation.
+6. Store the variation found in the user_storage
 */
 func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema.Campaign,
 	goalIdentifier string, options schema.Options) (schema.Variation, string, error) {
@@ -61,6 +74,7 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 	vwoInstance.UserID = userID
 	vwoInstance.Campaign = campaign
 	integrationsMap := getIntegrationsMap(vwoInstance, campaign, userID, goalIdentifier, options)
+	SettingsFile := vwoInstance.SettingsFile
 
 	_, ok := options.VariationTargetingVariables["_vwo_user_id"]
 	if !ok {
@@ -68,16 +82,6 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 			options.VariationTargetingVariables = make(map[string]interface{})
 		}
 		options.VariationTargetingVariables["_vwo_user_id"] = userID
-	}
-
-	isCampaignPartOfGroup := utils.IsPartOfGroup(settingsFile, campaign)
-
-	if isCampaignPartOfGroup {
-		campaignID := campaign.ID
-		groupID := settingsFile.CampaignGroups[campaignID]
-		integrationsMap["groupId"] = groupID
-		groupName := settingsFile.Groups[groupID]["name"]
-		integrationsMap["groupName"] = groupName
 	}
 
 	targettedVariation, err := FindTargetedVariation(vwoInstance, userID, campaign, options)
@@ -103,7 +107,55 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 		return schema.Variation{}, "", fmt.Errorf(constants.DebugMessageUserNotPartOfCampaign, vwoInstance.API, userID, campaign.Key, campaign.Type, "IsUserPartOfCampaign")
 	}
 
-	if EvaluateSegment(vwoInstance, campaign.Segments, options) {
+	isPresegmentation := EvaluateSegment(vwoInstance, campaign.Segments, options)
+	/*
+		isCampaignPartOfGroup := utils.IsPartOfGroup(SettingsFile, campaign)
+		var groupID int
+		var groupName string
+		var variation schema.Variation
+
+		if isCampaignPartOfGroup {
+			campaignID := campaign.ID
+			groupID = SettingsFile.CampaignGroups[campaignID]
+			integrationsMap["groupId"] = groupID
+			groupName = SettingsFile.Groups[groupID]["name"].(string)
+			integrationsMap["groupName"] = groupName
+		}
+		isPresegmentation := EvaluateSegment(vwoInstance, campaign.Segments, options)
+		if isPresegmentation && isCampaignPartOfGroup {
+			groupCampaigns := utils.GetGroupCampaigns(SettingsFile,groupID)
+			if len(groupCampaigns) > 0 {
+				isAnyCampaignWhitelistedOrStored := CheckWhitelistingOrStorageForGroupedCampaigns(vwoInstance.UserStorage,userID,campaign,groupCampaigns,groupName,options,vwoInstance)
+				if isAnyCampaignWhitelistedOrStored {
+					//log message stating Return None as other campaign(s) is/are whitelisted or stored
+					return schema.Variation{},"",nil
+				}
+				eligibleCampaigns := GetEligibleCampaigns(userID,groupCampaigns,campaign,vwoInstance,campaign.Segments,options)
+				nonEligibleCampaignsKey := GetNonEligibleCampaignsKey(eligibleCampaigns,groupCampaigns)
+				//debug message stating all eligible campaigns
+				winnerCampaign := FindWinnerCampaign(userID,eligibleCampaigns)
+				//info message stating thewinner campaign
+				if winnerCampaign.ID != 0 && winnerCampaign.ID == campaign.ID {
+					variation, err := BucketUserToVariation(vwoInstance, userID, campaign)
+					if err != nil {
+						return schema.Variation{},"",err //some error message included in 3rd parameter
+					} else {
+						if storage, ok := vwoInstance.UserStorage.(interface{ Set(a, b, c, d string) }); ok {
+							storage.Set(userID, campaign.Key, variation.Name, goalIdentifier)
+							message := fmt.Sprintf(constants.InfoMessageSettingDataUserStorageService, vwoInstance.API, userID)
+							utils.LogMessage(vwoInstance.Logger, constants.Info, variationDecider, message)
+						}
+					}
+				} else {
+					//log message stating no winner/variation
+					return variation,"",nil
+				  }
+			}
+		}
+
+
+	*/
+	if isPresegmentation {
 		variation, err := BucketUserToVariation(vwoInstance, userID, campaign)
 		vwoInstance.Integrations.ExecuteCallBack(integrationsMap, false, campaign, variation, false)
 		if err != nil {
@@ -343,7 +395,7 @@ func GetEligibleCampaigns(userID string, groupCampaigns []schema.Campaign,
 				userID:           the unique ID assigned to the user
 				groupCampaigns:   campaigns part of group
 				calledCampaign:   campaign for which api is called
-				options:		  options object containing CustomVariables, VariationTargertting variables and Revenue Goal
+				options:		  options object containing CustomVariables, VariationTargetting variables and Revenue Goal
 		Return:
 				eliibleCampaigns: eligible campaigns from which winner campaign is to be selected
 	*/
@@ -416,8 +468,22 @@ func GetNonEligibleCampaignsKey(eligibleCampaigns []schema.Campaign, groupCampai
 	return NonEligibleCampaignsName
 }
 
+//CheckWhitelistingOrStorageForGroupedCampaigns function checks if any other campaign in groupCampaigns satisfies
+//whitelisting or is in user storage.
 func CheckWhitelistingOrStorageForGroupedCampaigns(userStorageObj schema.UserData, userID string, calledCampaign schema.Campaign,
 	groupCampaigns []schema.Campaign, groupName string, options schema.Options, vwoInstance schema.VwoInstance) bool {
+
+	/*
+		Args:
+			userStorageObj : userStorage object
+			userId         : the unique ID assigned to User
+			calledCampaign : campaign for which api is called
+			groupCampaigns : campaigns part of group
+			groupName      : name of the group
+			options        : options object containing CustomVariables, VariationTargetting variables and Revenue Goal
+		Return:
+			bool value stating whether any other campaigns aside from called campaign satisfies user storage or whitelisting criteria
+	*/
 	for i := range groupCampaigns {
 		if calledCampaign.ID != groupCampaigns[i].ID {
 			targettedVariation := GetWhiteListedVariationsList(vwoInstance, userID, groupCampaigns[i], options)
