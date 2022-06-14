@@ -41,13 +41,14 @@ const (
 	DebugBeforeBatchFlush                       = "Flushing events queue having length : %v for account: %v"
 	DebugAfterBatchFlush                        = "Events queue having %v events has been flushed "
 	DebugMessagePayloadTooLarge                 = "Impression event - %v failed due to exceeding payload size. Parameter eventsPerRequest in batchEvents config in launch API has value: %v. Please read the official documentation for knowing the size limits."
-	DebugMessageInvalidRequestTimeInterval      = "requestTimeInterval hould be > %v and <= %v. Assigning it the default value i.e %v seconds"
+	DebugMessageInvalidRequestTimeInterval      = "requestTimeInterval should be > %v and <= %v. Assigning it the default value i.e %v seconds"
 	DebugMessageInvalidEventsPerRequest         = "eventsPerRequest should be >= %v and <= %v. Assigning it the default value i.e %v"
 	/*Extras*/
 	DebugMessageCustomLoggerFound     = "[%v] Custom logger found"
 	DebugMessageNoSegmentsInVariation = "[%v] For User ID: %v of Campaign: %v, segment was missing, hence skipping segmentation %v "
 	DebugMessageSettingsFileProcessed = "[%v] Settings file processed"
 	DebugMessageValidConfiguration    = "[%v] SDK configuration and account settings are valid"
+	DebugMessageGotEligibleCampaigns  = "[%v] The follwing campaigns %v are eligible and the campaigns: %v are not eligible for the Mutually Exclusive Group: %v for the UserId: %v"
 
 	//Error Messages
 	ErrorMessageActivateAPIMissingParams                = "[%v] activate API got bad parameters. It expects campaignKey(String) as first, User ID(String) as second and options(Optional) as third argument"
@@ -125,4 +126,8 @@ const (
 	InfoMessageNoTargettedVariation      = "[%v] No targetted variation found : %v "
 	InfoMessageNoWhitelistedVariation    = "[%v] No whitelisting variation found in campaign: %v "
 	InfoMessageUserRecievedVariableValue = "[%v] Value for variable: %v of feature flag: %v is: %v for user: %v "
+	InfoMessageCampaignNotWinner         = "[%v] CampaignKey: %v does not qualify from the Mutually Exclusive Group: %v for User ID: %v"
+	InfoMessageEligibleCampaigns         = "[%v] Obtained %v eligible campaign winners out of %v from the Mutually Exclusive Group %v for the User ID %v"
+	InfoMessageObtainedWinnerCampaign    = "[%v] CampaignKey: %v is chosen as the winner from the Mutually Exclusive Group: %v for the user ID: %v"
+	InfoMessageCampaignSatisfiesStorage  = "[%v] CampaignKey: %v of the Mutually Exclusive Group: %v satisfies %v for the userID %v"
 )

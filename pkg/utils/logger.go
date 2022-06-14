@@ -22,13 +22,23 @@ import (
 )
 
 // LogMessage function generates Log messages and logs them into the logger, logger can be defined by the user itself too
-func LogMessage(logs interface{}, level, file, message string) {
+func LogMessage(logs interface{}, level, file, message string, arguments ...bool) {
 	/*
 		Args:
 			file: Name of file from where the function is called
 			message: Message to be logged
 			level: level of logging
 	*/
+
+	disableLogs := false
+
+	if len(arguments) > 0 {
+		disableLogs = arguments[0]
+	}
+
+	if disableLogs {
+		return
+	} //will not be logged when the disable logs flag is true
 
 	formattedMessage := string(file) + " : " + message
 

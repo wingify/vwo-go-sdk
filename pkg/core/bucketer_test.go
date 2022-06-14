@@ -44,7 +44,7 @@ func TestBucketUserToVariation(t *testing.T) {
 
 	campaign := vwoInstance.SettingsFile.Campaigns[0]
 	userID := testdata.GetRandomUser()
-	actual, err := BucketUserToVariation(vwoInstance, userID, campaign)
+	actual, err := BucketUserToVariation(vwoInstance, userID, campaign, false)
 	assertOutput.Nil(err, "Variations did not match")
 	assertOutput.NotEmpty(actual, "Variations did not match")
 
@@ -53,7 +53,7 @@ func TestBucketUserToVariation(t *testing.T) {
 
 	campaign = vwoInstance.SettingsFile.Campaigns[1]
 	userID = testdata.GetRandomUser()
-	actual, err = BucketUserToVariation(vwoInstance, userID, campaign)
+	actual, err = BucketUserToVariation(vwoInstance, userID, campaign, false)
 	assertOutput.NotNil(err, "Variation expected to be empty")
 	assertOutput.Empty(actual, "Variation expected to be empty")
 }

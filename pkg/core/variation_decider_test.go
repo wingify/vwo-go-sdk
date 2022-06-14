@@ -22,12 +22,12 @@ import (
 	"log"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/testdata"
 	"github.com/wingify/vwo-go-sdk/pkg/utils"
-	"github.com/stretchr/testify/assert"
 )
 
 type TestCase struct {
@@ -53,7 +53,7 @@ func TestEvaluateSegment(t *testing.T) {
 	options := schema.Options{
 		CustomVariables: map[string]interface{}{"a": "123", "hello": "world"},
 	}
-	value := EvaluateSegment(vwoInstance, segments, options)
+	value := EvaluateSegment(vwoInstance, segments, options, false)
 	assert.True(t, value, "Expected True as mismatch")
 }
 
@@ -63,7 +63,7 @@ func TestGetWhiteListedVariationsList(t *testing.T) {
 	options := schema.Options{}
 	userID := testdata.GetRandomUser()
 	campaign := vwoInstance.SettingsFile.Campaigns[0]
-	actual := GetWhiteListedVariationsList(vwoInstance, userID, campaign, options)
+	actual := GetWhiteListedVariationsList(vwoInstance, userID, campaign, options, false)
 	assert.Empty(t, actual, "No WhiteListed Variations Found")
 
 	vwoInstance = testdata.GetInstanceWithCustomSettings("SettingsFile3")
@@ -73,7 +73,7 @@ func TestGetWhiteListedVariationsList(t *testing.T) {
 	}
 	userID = testdata.GetRandomUser()
 	campaign = vwoInstance.SettingsFile.Campaigns[0]
-	actual = GetWhiteListedVariationsList(vwoInstance, userID, campaign, options)
+	actual = GetWhiteListedVariationsList(vwoInstance, userID, campaign, options, false)
 	expected := campaign.Variations[0:2]
 	assert.Equal(t, expected, actual, "No WhiteListed Variations Found")
 }
@@ -89,7 +89,7 @@ func TestFindTargetedVariation(t *testing.T) {
 	options := schema.Options{
 		VariationTargetingVariables: map[string]interface{}{"a": "789"},
 	}
-	actual, _ := FindTargetedVariation(instance, testdata.ValidUser, campaign, options)
+	actual, _ := FindTargetedVariation(instance, testdata.ValidUser, campaign, options, false)
 	assertOutput.Equal("", actual.Name, "Variations should match")
 }
 
@@ -215,7 +215,7 @@ func TestGetVariationFromUserStorage(t *testing.T) {
 
 	campaign := vwoInstance.SettingsFile.Campaigns[0]
 	userID := testdata.ValidUser
-	actual, storedGoalIdentifier := GetVariationFromUserStorage(vwoInstance, userID, campaign)
+	actual, storedGoalIdentifier := GetVariationFromUserStorage(vwoInstance, userID, campaign, false)
 	assertOutput.Empty(actual, "Actual and Expected Variation Name mismatch")
 
 	vwoInstance = testdata.GetInstanceWithStorage("AB_T_50_W_50_50")
@@ -223,14 +223,14 @@ func TestGetVariationFromUserStorage(t *testing.T) {
 	campaign = vwoInstance.SettingsFile.Campaigns[0]
 	userID = testdata.ValidUser
 	expected := testdata.DummyVariation
-	actual, storedGoalIdentifier = GetVariationFromUserStorage(vwoInstance, userID, campaign)
+	actual, storedGoalIdentifier = GetVariationFromUserStorage(vwoInstance, userID, campaign, false)
 	assertOutput.Equal(testdata.DummyGoal, storedGoalIdentifier, "Actual and Expected goalIdentifier did not match")
 	assertOutput.Equal(expected, actual, "Actual and Expected Variation Name mismatch")
 
 	campaign = vwoInstance.SettingsFile.Campaigns[0]
 	userID = testdata.InvalidUser
 	expected = ""
-	actual, storedGoalIdentifier = GetVariationFromUserStorage(vwoInstance, userID, campaign)
+	actual, storedGoalIdentifier = GetVariationFromUserStorage(vwoInstance, userID, campaign, false)
 	assertOutput.Equal(storedGoalIdentifier, "", "Actual and Expected goalIdentifier did not match")
 	assertOutput.Equal(expected, actual, "Actual and Expected Variation Name mismatch")
 

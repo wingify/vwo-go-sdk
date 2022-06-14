@@ -108,11 +108,12 @@ func IsUserPartOfCampaign(vwoInstance schema.VwoInstance, userID string, campaig
 }
 
 // BucketUserToVariation validates the User ID and returns Variation into which the User is bucketed in.
-func BucketUserToVariation(vwoInstance schema.VwoInstance, userID string, campaign schema.Campaign) (schema.Variation, error) {
+func BucketUserToVariation(vwoInstance schema.VwoInstance, userID string, campaign schema.Campaign, disableLogs bool) (schema.Variation, error) {
 	/*
 		Args:
 		    userID: the unique ID assigned to User
 		    campaign: the Campaign of which User is a part of
+			disableLogs : flag which when set to true nothing will be logged
 
 		Returns:
 			schema.Variation: variation data into which user is bucketed in
@@ -147,11 +148,11 @@ func addRangesToVariations(variations []schema.Variation) []schema.Variation {
 			variations : array of type schema.Variation after adding ranges for every variation in the array passed
 	*/
 	offset := 0
-	for i := range variations {
-		limit := int(math.Floor(variations[i].Weight * constants.MaxTrafficValue / 100))
+	for _, currentVariation := range variations {
+		limit := int(math.Floor(currentVariation.Weight * constants.MaxTrafficValue / 100))
 		maxRange := offset + limit
-		variations[i].StartVariationAllocation = offset + 1
-		variations[i].EndVariationAllocation = maxRange
+		currentVariation.StartVariationAllocation = offset + 1
+		currentVariation.EndVariationAllocation = maxRange
 		offset = maxRange
 	}
 	return variations
@@ -166,11 +167,11 @@ func addRangesToCampaigns(campaigns []schema.Campaign) []schema.Campaign {
 			campaigns : array of type schema.Campaign after adding ranges for every Campaign in the array passed
 	*/
 	offset := 0
-	for i := range campaigns {
-		limit := int(math.Floor(campaigns[i].Weight * constants.MaxTrafficValue / 100))
+	for _, currentCampaign := range campaigns {
+		limit := int(math.Floor(currentCampaign.Weight * constants.MaxTrafficValue / 100))
 		maxRange := offset + limit
-		campaigns[i].MaxRange = offset + 1
-		campaigns[i].MinRange = maxRange
+		currentCampaign.MaxRange = offset + 1
+		currentCampaign.MinRange = maxRange
 		offset = maxRange
 	}
 	return campaigns
@@ -187,9 +188,9 @@ func getCampaignUsingRange(rangeForCampaigns int, campaigns []schema.Campaign) (
 			else -->nil
 	*/
 	rangeForCampaigns = rangeForCampaigns * constants.MaxTrafficValue
-	for i := range campaigns {
-		if campaigns[i].MaxRange != 0 && campaigns[i].MaxRange >= rangeForCampaigns && campaigns[i].MinRange <= rangeForCampaigns {
-			return campaigns[i], nil
+	for _, currentCampaign := range campaigns {
+		if currentCampaign.MaxRange != 0 && currentCampaign.MaxRange >= rangeForCampaigns && currentCampaign.MinRange <= rangeForCampaigns {
+			return currentCampaign, nil
 		}
 	}
 	return schema.Campaign{}, nil //to add some error message

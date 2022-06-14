@@ -191,8 +191,8 @@ func ScaleCampaigns(campaigns []schema.Campaign) []schema.Campaign {
 			campaigns  : List of campaigns(schema.Campaigns) after scaling
 	*/
 	normalizedWeight := 100 / float64(len(campaigns))
-	for i := range campaigns {
-		campaigns[i].Weight = normalizedWeight
+	for _, currentCampaign := range campaigns {
+		currentCampaign.Weight = normalizedWeight
 	}
 	return campaigns
 }
@@ -312,10 +312,10 @@ func GetGroupCampaigns(settingsFile schema.SettingsFile, groupID int) []schema.C
 		}
 	}
 	if len(groupCampaignIds) > 0 {
-		for i := range groupCampaignIds {
+		for _, groupCampaignId := range groupCampaignIds {
 			for j := range settingsFile.Campaigns {
 				currentCampaign := settingsFile.Campaigns[j]
-				if currentCampaign.ID == groupCampaignIds[i] && currentCampaign.Status == Running {
+				if currentCampaign.ID == groupCampaignId && currentCampaign.Status == Running {
 					groupCampaigns = append(groupCampaigns, currentCampaign)
 				}
 			}
