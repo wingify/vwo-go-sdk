@@ -115,9 +115,9 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 	isCampaignPartOfGroup := utils.IsPartOfGroup(SettingsFile, campaign)
 	if isCampaignPartOfGroup {
 		campaignID := campaign.ID
-		groupID := SettingsFile.CampaignGroups[campaignID]
+		groupID := SettingsFile.CampaignGroups[strconv.Itoa(campaignID)]
 		integrationsMap["groupId"] = groupID
-		groupName := SettingsFile.Groups[groupID]["name"].(string)
+		groupName := SettingsFile.Groups[strconv.Itoa(groupID)]["name"].(string)
 		integrationsMap["groupName"] = groupName
 
 		if EvaluateSegment(vwoInstance, campaign.Segments, options, false) {

@@ -18,12 +18,12 @@ package schema
 
 // SettingsFile struct
 type SettingsFile struct {
-	SDKKey           string                         `json:"sdkKey"`
-	Campaigns        []Campaign                     `json:"campaigns"`
-	AccountID        int                            `json:"accountId"`
-	CollectionPrefix string                         `json:"collectionPrefix"`
-	CampaignGroups   map[int]int                    `json:"campaignGroups"`
-	Groups           map[int]map[string]interface{} `json:"groups"`
+	SDKKey           string                            `json:"sdkKey"`
+	Campaigns        []Campaign                        `json:"campaigns"`
+	AccountID        int                               `json:"accountId"`
+	CollectionPrefix string                            `json:"collectionPrefix"`
+	CampaignGroups   map[string]int                    `json:"campaignGroups"`
+	Groups           map[string]map[string]interface{} `json:"groups"`
 }
 
 // Campaign struct

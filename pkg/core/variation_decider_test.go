@@ -235,3 +235,353 @@ func TestGetVariationFromUserStorage(t *testing.T) {
 	assertOutput.Equal(expected, actual, "Actual and Expected Variation Name mismatch")
 
 }
+
+/* function CheckIfKeyExists checks whether key is actually present in the array or not
+func CheckIfKeyExists(TrackResult []schema.TrackResult, key string) bool {
+	for _, currentTrackResult := range TrackResult {
+		if currentTrackResult.CampaignKey == key {
+			return currentTrackResult.TrackValue //if key exists return that corresponding track value
+		}
+	}
+	return false //if key does not exist returning false
+}
+
+// functions for testing Mutually Exclusive Groups
+
+func TestVariationReturnAsWhitelisting(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	//instance := testdata.GetInstanceWithSettings("SettingsFileMeg")
+	campaignKey := instance.SettingsFile.Campaigns[2].Key
+	options := make(map[string]interface{})
+	options["variationTargetingVariables"] = map[string]interface{}{"chrome": "false"}
+
+	// called campaign satisfies the whitelisting
+	Variation := instance.Activate(campaignKey, "Ashley", options)
+	TrackResult := instance.Track(campaignKey, "Ashley", "CUSTOM", options)
+	VariationName := instance.GetVariationName(campaignKey, "Ashley", options)
+	isGoalTracked := CheckIfKeyExists(TrackResult, campaignKey)
+	assertOutput.Equal("Variation-1", Variation, "Actual and expected variations did not match")
+	assertOutput.Equal("Variation-1", VariationName, "Actual and expected variation Name mismatch ")
+	assertOutput.Equal(true, isGoalTracked, "Goal is not tracked correctly")
+}
+
+func TestNullVariationAsOtherCampaignSatisfiesWhitelisting(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	//instance := testdata.GetInstanceWithSettings("SettingsFileMeg")
+	campaignKey := instance.SettingsFile.Campaigns[3].Key
+	options := make(map[string]interface{})
+	options["variationTargetingVariables"] = map[string]interface{}{"chrome": "false"}
+
+	Variation := instance.Activate(campaignKey, "Ashley", options)
+	TrackResult := instance.Track(campaignKey, "Ashley", "CUSTOM", options)
+	VariationName := instance.GetVariationName(campaignKey, "Ashley", options)
+	isGoalTracked := CheckIfKeyExists(TrackResult, campaignKey)
+	assertOutput.Equal("", Variation, "Actual and expected variations did not match")
+	assertOutput.Equal("", VariationName, "Actual and expected variation Name mismatch ")
+	assertOutput.Equal(false, isGoalTracked, "Goal is not tracked correctly")
+}
+
+func TestVariationForCalledCampaign(t *testing.T) {
+
+}
+
+func TestNullVariationAsOtherCampaignSatisfiesStorage(t *testing.T) {
+
+}
+
+func TestVariationForCalledCampaignInStorageAndOtherCampaignSatisfiesWhitelisting(t *testing.T) {
+
+}
+
+func TestNullVariationWhenCampaignNotInGroup(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	//instance := testdata.GetInstanceWithSettings("SettingsFileMeg")
+	options := make(map[string]interface{})
+
+	campaignKey := instance.SettingsFile.Campaigns[4].Key
+	Variation := instance.Activate(campaignKey, "Ashley", options)
+	TrackResult := instance.Track(campaignKey, "Ashley", "CUSTOM", options)
+	VariationName := instance.GetVariationName(campaignKey, "Ashley", options)
+	isGoalTracked := CheckIfKeyExists(TrackResult, campaignKey)
+	assertOutput.Equal("", Variation, "Actual and expected variations did not match")
+	assertOutput.Equal("", VariationName, "Actual and expected variation Name mismatch ")
+	assertOutput.Equal(false, isGoalTracked, "Goal is not tracked correctly")
+}
+
+func TestNoCampaignsSatisfiesPresegmentation(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	campaignKey := instance.SettingsFile.Campaigns[0].Key
+	options := make(map[string]interface{})
+	options["customVariables"] = map[string]interface{}{"browser": "chrome"}
+
+	segmentPassed := make(map[string]interface{})
+	segmentPassed["or"] = map[string]interface{}{"custom_variable": {"chrome": "false"}}
+	instance.SettingsFile.Campaigns[0].Segments = segmentPassed
+	instance.SettingsFile.Campaigns[1].Segments = segmentPassed
+	isFeatureEnabled := instance.IsFeatureEnabled(campaignKey, "Ashley", options)
+	variableValue := instance.GetFeatureVariableValue(campaignKey, "STRING_VARIABLE", "Ashley", options)
+	assertOutput.Equal(isFeatureEnabled, false, "Feature is not enabled correctly")
+	assertOutput.Equal(variableValue, nil, "Variable value of feature is wrongly interpreted")
+
+	// implementing the same condition with zero traffic percentage
+	instance.SettingsFile.Campaigns[0].PercentTraffic = 0
+	instance.SettingsFile.Campaigns[1].PercentTraffic = 0
+	isFeatureEnabled = instance.IsFeatureEnabled(campaignKey, "Ashley", options)
+	variableValue = instance.GetFeatureVariableValue(campaignKey, "STRING_VARIABLE", "Ashley", options)
+	assertOutput.Equal(isFeatureEnabled, false, "Feature is not enabled correctly")
+	assertOutput.Equal(variableValue, nil, "Variable value of feature is wrongly interpreted")
+}
+
+func TestCalledCampaignNotSatisfyingPresegmentation(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	campaignKey := instance.SettingsFile.Campaigns[0].Key
+	options := make(map[string]interface{})
+	options["customVariables"] = map[string]interface{}{"browser": "chrome"}
+
+	segmentFailed := make(map[string]interface{})
+	segmentFailed["or"] = map[string]interface{}{"custom_variable": {"chrome": "false"}}
+
+	segmentPassed := make(map[string]interface{})
+	segmentPassed["or"] = map[string]interface{}{"custom_variable": {"browser": "chrome"}}
+
+	instance.SettingsFile.Campaigns[0].Segments = segmentFailed
+	instance.SettingsFile.Campaigns[1].Segments = segmentPassed
+	isFeatureEnabled := instance.IsFeatureEnabled(campaignKey, "Ashley", options)
+	variableValue := instance.GetFeatureVariableValue(campaignKey, "STRING_VARIABLE", "Ashley", options)
+	assertOutput.Equal(isFeatureEnabled, false, "Feature is not enabled correctly")
+	assertOutput.Equal(variableValue, nil, "Variable value of feature is wrongly interpreted")
+
+	// implementing the same condition with different traffic percentage
+	instance.SettingsFile.Campaigns[0].PercentTraffic = 0
+	instance.SettingsFile.Campaigns[1].PercentTraffic = 100
+	isFeatureEnabled = instance.IsFeatureEnabled(campaignKey, "Ashley", options)
+	variableValue = instance.GetFeatureVariableValue(campaignKey, "STRING_VARIABLE", "Ashley", options)
+	assertOutput.Equal(isFeatureEnabled, false, "Feature is not enabled correctly")
+	assertOutput.Equal(variableValue, nil, "Variable value of feature is wrongly interpreted")
+}
+
+func TestOnlyCalledCampaignSatisfyPresegmentation(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	campaignKey := instance.SettingsFile.Campaigns[0].Key
+	options := make(map[string]interface{})
+	options["customVariables"] = map[string]interface{}{"browser": "chrome"}
+
+	segmentFailed := make(map[string]interface{})
+	segmentFailed["or"] = map[string]interface{}{"custom_variable": {"chrome": "false"}}
+
+	segmentPassed := make(map[string]interface{})
+	segmentPassed["or"] = map[string]interface{}{"custom_variable": {"browser": "chrome"}}
+
+	instance.SettingsFile.Campaigns[0].Segments = segmentPassed
+	instance.SettingsFile.Campaigns[1].Segments = segmentFailed
+	isFeatureEnabled := instance.IsFeatureEnabled(campaignKey, "Ashley", options)
+	variableValue := instance.GetFeatureVariableValue(campaignKey, "STRING_VARIABLE", "Ashley", options)
+	assertOutput.Equal(isFeatureEnabled, true, "Feature is not enabled correctly")
+	assertOutput.Equal(variableValue, "Control string", "Variable value of feature is wrongly interpreted")
+
+	// implementing the same condition with different traffic percentage
+	instance.SettingsFile.Campaigns[0].PercentTraffic = 100
+	instance.SettingsFile.Campaigns[1].PercentTraffic = 0
+	isFeatureEnabled = instance.IsFeatureEnabled(campaignKey, "Ashley", options)
+	variableValue = instance.GetFeatureVariableValue(campaignKey, "STRING_VARIABLE", "Ashley", options)
+	assertOutput.Equal(isFeatureEnabled, true, "Feature is not enabled correctly")
+	assertOutput.Equal(variableValue, "Control string", "Variable value of feature is wrongly interpreted")
+}
+
+func TestCalledCampaignWinnerCampaign(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	campaignKey := instance.SettingsFile.Campaigns[0].Key
+	options := make(map[string]interface{})
+
+	instance.SettingsFile.Campaigns[0].PercentTraffic = 100
+	instance.SettingsFile.Campaigns[1].PercentTraffic = 0
+	isFeatureEnabled := instance.IsFeatureEnabled(campaignKey, "Ashley", options)
+	variableValue := instance.GetFeatureVariableValue(campaignKey, "STRING_VARIABLE", "Ashley", options)
+	assertOutput.Equal(isFeatureEnabled, true, "Feature is not enabled correctly")
+	assertOutput.Equal(variableValue, "Control string", "Variable value of feature is wrongly interpreted")
+
+	campaignKey = instance.SettingsFile.Campaigns[2].Key
+	Variation := instance.Activate(campaignKey, "Ashley", options)
+	TrackResult := instance.Track(campaignKey, "Ashley", "CUSTOM", options)
+	VariationName := instance.GetVariationName(campaignKey, "Ashley", options)
+	isGoalTracked := CheckIfKeyExists(TrackResult, campaignKey)
+	assertOutput.Equal("Control", Variation, "Actual and expected variations did not match")
+	assertOutput.Equal("Control", VariationName, "Actual and expected variation Name mismatch ")
+	assertOutput.Equal(true, isGoalTracked, "Goal is not tracked correctly")
+}
+
+func TestCalledCampaignNotWinnerCampaign(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	campaignKey := instance.SettingsFile.Campaigns[0].Key
+	options := make(map[string]interface{})
+
+	instance.SettingsFile.Campaigns[0].PercentTraffic = 100
+	instance.SettingsFile.Campaigns[1].PercentTraffic = 100
+	isFeatureEnabled := instance.IsFeatureEnabled(campaignKey, "lisa", options)
+	assertOutput.Equal(isFeatureEnabled, false, "Feature is not enabled correctly")
+
+	campaignKey = instance.SettingsFile.Campaigns[2].Key
+	Variation := instance.Activate(campaignKey, "lisa", options)
+	assertOutput.Equal("", Variation, "Actual and expected variations did not match")
+}
+
+func TestWhenEqualTrafficAmongEligibleCampaigns(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	campaignKey := instance.SettingsFile.Campaigns[2].Key
+	options := make(map[string]interface{})
+
+	instance.SettingsFile.Campaigns[2].PercentTraffic = 80
+	instance.SettingsFile.Campaigns[3].PercentTraffic = 50
+	Variation := instance.Activate(campaignKey, "Ashley", options)
+	assertOutput.Equal("Variation-1", Variation, "Actual and expected variations did not match")
+}
+
+func TestWhenBothCampaignsNewToUser(t *testing.T) {
+	assertOutput := assert.New(t)
+	instance := tests.GetVWOClientInstance("SettingsFileMeg")
+	campaignKey := instance.SettingsFile.Campaigns[2].Key
+	options := make(map[string]interface{})
+	Variation := instance.Activate(campaignKey, "Ashley", options)
+	assertOutput.Equal("Control", Variation, "Actual and expected variations did not match")
+
+	campaignKey = instance.SettingsFile.Campaigns[3].Key
+	Variation = instance.Activate(campaignKey, "Ashley", options)
+	assertOutput.Equal("", Variation, "Actual and expected variations did not match")
+}
+
+func TestWhenUserAlreadyPartOfCampaignAndNewCampaignAddedToGroup(t *testing.T) {
+
+}
+
+func TestWhenViewedCampaignRemovedFromGroup(t *testing.T) {
+
+}
+
+/*
+
+  public function testVariationForCalledCampaign()
+  {
+      $campaignKey = $this->settingsFileMEG['campaigns'][2]['key'];
+      $vwoInstance = TestUtil::instantiateSdk($this->settingsFileMEG, ['isUserStorage' => 1]);
+
+      $variation = $vwoInstance->activate($campaignKey, 'Ashley');
+      $isGoalTracked = $vwoInstance->track($campaignKey, 'Ashley', 'CUSTOM');
+      $variationName = $vwoInstance->getVariationName($campaignKey, 'Ashley');
+      $this->assertEquals($variation, 'Control');
+      $this->assertEquals($variationName, 'Control');
+      $this->assertEquals($isGoalTracked, true);
+  }
+
+  public function testNullVariationAsOtherCampaignSatisfiesStorage()
+  {
+      $campaignKey = $this->settingsFileMEG['campaigns'][2]['key'];
+      $vwoInstance = TestUtil::instantiateSdk($this->settingsFileMEG);
+
+      $variationInfo = [
+          'userId' => 'Ashley',
+          'variationName' => 'Control',
+          'campaignKey' => $campaignKey
+      ];
+      $vwoInstance->_userStorageObj = TestUtil::mockUserStorageInterface($this, $variationInfo);
+
+      // called campaign satisfies the whitelisting
+      $variation = $vwoInstance->activate($campaignKey, 'Ashley');
+      $variationName = $vwoInstance->getVariationName($campaignKey, 'Ashley');
+      $isGoalTracked = $vwoInstance->track($campaignKey, 'Ashley', 'CUSTOM');
+      $this->assertEquals($variation, 'Control');
+      $this->assertEquals($variationName, 'Control');
+      $this->assertEquals($isGoalTracked, true);
+
+      $campaignKey = $this->settingsFileMEG['campaigns'][3]['key'];
+      $variation = $vwoInstance->activate($campaignKey, 'Ashley');
+      $variationName = $vwoInstance->getVariationName($campaignKey, 'Ashley');
+      $isGoalTracked = $vwoInstance->track($campaignKey, 'Ashley', 'CUSTOM');
+      $this->assertEquals($variation, null);
+      $this->assertEquals($variationName, null);
+      $this->assertEquals($isGoalTracked, null);
+  }
+
+ public function testVariationForCalledCampaignInStorageAndOtherCampaignSatisfiesWhitelisting()
+  {
+      $campaignKey = $this->settingsFileMEG['campaigns'][2]['key'];
+      $vwoInstance = TestUtil::instantiateSdk($this->settingsFileMEG, ['isUserStorage' => 1]);
+
+      $options = [
+          'variationTargetingVariables' => [
+              'browser' => "chrome"
+          ]
+      ];
+
+      $segmentPassed = [
+          "or" => [
+              [
+                  "custom_variable" => [
+                      'browser' => "chrome"
+                  ]
+              ]
+          ]
+      ];
+
+      $variation = $vwoInstance->activate($campaignKey, 'Ashley');
+      $this->assertEquals($variation, 'Control');
+      $vwoInstance->settings['campaigns'][3]['segments'] = $segmentPassed;
+      $variation = $vwoInstance->activate($campaignKey, 'Ashley', $options);
+      $this->assertEquals($variation, 'Control');
+  }
+
+
+  public function testWhenUserAlreadyPartOfCampaignAndNewCampaignAddedToGroup()
+  {
+      $campaignKey = $this->settingsFileMEG['campaigns'][2]['key'];
+      $vwoInstance = TestUtil::instantiateSdk($this->settingsFileMEG);
+
+      $variationInfo = [
+          'userId' => 'Ashley',
+          'variationName' => 'Control',
+          'campaignKey' => $campaignKey
+      ];
+      $vwoInstance->_userStorageObj = TestUtil::mockUserStorageInterface($this, $variationInfo);
+
+      // user is already a part of a campaign
+      $variation = $vwoInstance->activate($campaignKey, 'Ashley');
+      $this->assertEquals($variation, 'Control');
+
+      // new campaign is added to the group
+      $vwoInstance->settings['campaignGroups'][164] = 2;
+      $vwoInstance->settings['groups'][2]['campaigns'][] = 164;
+      $variation = $vwoInstance->activate($this->settingsFileMEG['campaigns'][4]['key'], 'Ashley');
+      $this->assertEquals($variation, null);
+  }
+
+  public function testWhenViewedCampaignRemovedFromGroup()
+  {
+      $campaignKey = $this->settingsFileMEG['campaigns'][2]['key'];
+      $vwoInstance = TestUtil::instantiateSdk($this->settingsFileMEG, ['isUserStorage' => 1]);
+
+      $variationInfo = [
+          'userId' => 'Ashley',
+          'variationName' => 'Control',
+          'campaignKey' => $campaignKey
+      ];
+      $vwoInstance->_userStorageObj = TestUtil::mockUserStorageInterface($this, $variationInfo);
+
+      // user is already a part of a campaign
+      $variation = $vwoInstance->activate($campaignKey, 'Ashley');
+      $this->assertEquals($variation, 'Control');
+
+      // old campaign is removed from the group
+      $vwoInstance->settings['groups'][2]['campaigns'] = [163];
+
+      // since user has already seen that campaign, they will continue to become part of that campaign
+      $variation = $vwoInstance->activate($campaignKey, 'Ashley');
+      $this->assertEquals($variation, 'Control');
+  }*/

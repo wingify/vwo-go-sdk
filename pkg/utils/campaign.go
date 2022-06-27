@@ -19,6 +19,7 @@ package utils
 import (
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
@@ -282,7 +283,7 @@ func IsPartOfGroup(settingsFile schema.SettingsFile, campaign schema.Campaign) b
 	if len(settingsFile.CampaignGroups) != 0 {
 		// _ will receive either the value of key(here key is campaign.ID) from the map or a "zero value"
 		//and exists will receive a bool that will be set to true if key was actually present in the map
-		_, exists := settingsFile.CampaignGroups[campaign.ID]
+		_, exists := settingsFile.CampaignGroups[strconv.Itoa(campaign.ID)]
 		if exists {
 			return true
 		}
@@ -301,16 +302,24 @@ func GetGroupCampaigns(settingsFile schema.SettingsFile, groupID int) []schema.C
 	*/
 	var groupCampaignIds []int
 	var groupCampaigns []schema.Campaign
-	Groups := settingsFile.Groups
-
-	if len(Groups) != 0 {
-		// _ will receive either the value of key(here key is groupID) from the map or a "zero value"
-		//and exists will receive a bool that will be set to true if key was actually present in the map
-		_, exists := Groups[groupID]
-		if exists {
-			groupCampaignIds = (Groups[groupID]["campaigns"]).([]int)
+	campaignGroups := settingsFile.CampaignGroups
+	/*
+		if len(Groups) != 0 {
+			// _ will receive either the value of key(here key is groupID) from the map or a "zero value"
+			//and exists will receive a bool that will be set to true if key was actually present in the map
+			_, exists := Groups[strconv.Itoa(groupID)]
+			if exists {
+				groupCampaignIds := (Groups[strconv.Itoa(groupID)]["campaigns"])
+			}
+		}
+	*/
+	for currentKey := range campaignGroups {
+		if campaignGroups[currentKey] == groupID {
+			campaignID, _ := strconv.Atoi(currentKey)
+			groupCampaignIds = append(groupCampaignIds, campaignID)
 		}
 	}
+
 	if len(groupCampaignIds) > 0 {
 		for _, groupCampaignId := range groupCampaignIds {
 			for j := range settingsFile.Campaigns {
