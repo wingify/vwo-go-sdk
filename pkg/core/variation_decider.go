@@ -418,7 +418,7 @@ func GetEligibleCampaigns(userID string, groupCampaigns []schema.Campaign,
 }
 
 // FindWinnerCampaign finds and returns the winner campaign from eligiblecampaigns list of campaigns
-func FindWinnerCampaign(userID string, elgibleCampaigns []schema.Campaign) schema.Campaign {
+func FindWinnerCampaign(userID string, eligibleCampaigns []schema.Campaign) schema.Campaign {
 	/*
 		Args:
 			userID     		  : the unique ID assigned to User
@@ -427,12 +427,12 @@ func FindWinnerCampaign(userID string, elgibleCampaigns []schema.Campaign) schem
 			campaign if winner can be obtained
 			nil if not
 	*/
-	if len(elgibleCampaigns) == 1 {
-		return elgibleCampaigns[0]
+	if len(eligibleCampaigns) == 1 {
+		return eligibleCampaigns[0]
 	}
 
 	//Scale the traffic percent of each campaign
-	eligibleCampaigns := utils.ScaleCampaigns(elgibleCampaigns)
+	eligibleCampaigns = utils.ScaleCampaigns(eligibleCampaigns)
 	//Allocate new range for campaigns
 	eligibleCampaigns = addRangesToCampaigns(eligibleCampaigns)
 	//Now retrieve the campaign from the modified_campaign_for_whitelisting

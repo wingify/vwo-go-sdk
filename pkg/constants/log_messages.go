@@ -96,6 +96,7 @@ const (
 	ErrorMessageVariationNotFound                         = "[%v] Variation : %v not found in campaign : %v "
 	ErrorMessageBatchImpressionFailed                     = "Impression event could not be sent to VWO endpoint - %v. Status code: %v"
 	ErrorMessageBatchFlushError                           = "Error encountered in batch flush: %v"
+	ErrorMessageNoCampaignIsInRange                       = "No campaign is in range satisfying the threshold value of %v"
 
 	//Info Messages
 	InfoMessageFeatureEnabledForUser            = "[%v] Campaign: %v for user ID: %v is enabled"

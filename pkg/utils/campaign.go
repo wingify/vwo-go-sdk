@@ -170,12 +170,12 @@ func ScaleVariations(variations []schema.Variation) []schema.Variation {
 	}
 	if weightSum == 0 {
 		normalizedWeight := 100.0 / float64(len(variations))
-		for i := range variations {
-			variations[i].Weight = normalizedWeight
+		for idx := range variations {
+			variations[idx].Weight = normalizedWeight
 		}
 	} else {
-		for _, variation := range variations {
-			variation.Weight = (variation.Weight / weightSum) * 100
+		for idx := range variations {
+			variations[idx].Weight = (variations[idx].Weight / weightSum) * 100
 		}
 	}
 	return variations
@@ -192,8 +192,8 @@ func ScaleCampaigns(campaigns []schema.Campaign) []schema.Campaign {
 			campaigns  : List of campaigns(schema.Campaigns) after scaling
 	*/
 	normalizedWeight := 100 / float64(len(campaigns))
-	for _, currentCampaign := range campaigns {
-		currentCampaign.Weight = normalizedWeight
+	for idx := range campaigns {
+		campaigns[idx].Weight = normalizedWeight
 	}
 	return campaigns
 }

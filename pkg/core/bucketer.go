@@ -148,11 +148,11 @@ func addRangesToVariations(variations []schema.Variation) []schema.Variation {
 			variations : array of type schema.Variation after adding ranges for every variation in the array passed
 	*/
 	offset := 0
-	for _, currentVariation := range variations {
-		limit := int(math.Floor(currentVariation.Weight * constants.MaxTrafficValue / 100))
+	for idx := range variations {
+		limit := int(math.Floor(variations[idx].Weight * constants.MaxTrafficValue / 100))
 		maxRange := offset + limit
-		currentVariation.StartVariationAllocation = offset + 1
-		currentVariation.EndVariationAllocation = maxRange
+		variations[idx].StartVariationAllocation = offset + 1
+		variations[idx].EndVariationAllocation = maxRange
 		offset = maxRange
 	}
 	return variations
@@ -167,11 +167,11 @@ func addRangesToCampaigns(campaigns []schema.Campaign) []schema.Campaign {
 			campaigns : array of type schema.Campaign after adding ranges for every Campaign in the array passed
 	*/
 	offset := 0
-	for _, currentCampaign := range campaigns {
-		limit := int(math.Floor(currentCampaign.Weight * constants.MaxTrafficValue / 100))
+	for idx := range campaigns {
+		limit := int(math.Floor(campaigns[idx].Weight * constants.MaxTrafficValue / 100))
 		maxRange := offset + limit
-		currentCampaign.MaxRange = offset + 1
-		currentCampaign.MinRange = maxRange
+		campaigns[idx].MinRange = offset + 1
+		campaigns[idx].MaxRange = maxRange
 		offset = maxRange
 	}
 	return campaigns
@@ -193,6 +193,6 @@ func getCampaignUsingRange(rangeForCampaigns int, campaigns []schema.Campaign) (
 			return currentCampaign, nil
 		}
 	}
-	return schema.Campaign{}, nil //to add some error message
+	return schema.Campaign{}, fmt.Errorf(constants.ErrorMessageNoCampaignIsInRange, rangeForCampaigns) //to add some error message
 	//fmt.Errorf(constants.ErrorMessageNoVariationForBucketValue, vwoInstance.API, userID, campaignKey, bucketValue)
 }
