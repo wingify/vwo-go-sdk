@@ -27,12 +27,26 @@ import (
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/testdata"
+	"github.com/wingify/vwo-go-sdk/pkg/tests"
 	"github.com/wingify/vwo-go-sdk/pkg/utils"
 )
 
 type TestCase struct {
 	User      string `json:"user"`
 	Variation string `json:"variation"`
+}
+
+type SegmentsHelper struct {
+	Or ORHelper `json:"or"`
+}
+
+type ORHelper struct {
+	CustomVariables custVar `json:"custom_variable"`
+}
+
+type custVar struct {
+	Chrome  string `json:"chrome"`
+	Browser string `json:"browser"`
 }
 
 func TestPreEvaluateSegment(t *testing.T) {
@@ -236,7 +250,9 @@ func TestGetVariationFromUserStorage(t *testing.T) {
 
 }
 
-/* function CheckIfKeyExists checks whether key is actually present in the array or not
+// functions for testing Mutually Exclusive Groups
+
+// function CheckIfKeyExists checks whether key is actually present in the array or not
 func CheckIfKeyExists(TrackResult []schema.TrackResult, key string) bool {
 	for _, currentTrackResult := range TrackResult {
 		if currentTrackResult.CampaignKey == key {
@@ -245,8 +261,6 @@ func CheckIfKeyExists(TrackResult []schema.TrackResult, key string) bool {
 	}
 	return false //if key does not exist returning false
 }
-
-// functions for testing Mutually Exclusive Groups
 
 func TestVariationReturnAsWhitelisting(t *testing.T) {
 	assertOutput := assert.New(t)
@@ -318,8 +332,9 @@ func TestNoCampaignsSatisfiesPresegmentation(t *testing.T) {
 	options := make(map[string]interface{})
 	options["customVariables"] = map[string]interface{}{"browser": "chrome"}
 
-	segmentPassed := make(map[string]interface{})
-	segmentPassed["or"] = map[string]interface{}{"custom_variable": {"chrome": "false"}}
+	segmentPassed := SegmentsHelper{}
+	segmentPassed.Or.CustomVariables.Chrome = "false"
+
 	instance.SettingsFile.Campaigns[0].Segments = segmentPassed
 	instance.SettingsFile.Campaigns[1].Segments = segmentPassed
 	isFeatureEnabled := instance.IsFeatureEnabled(campaignKey, "Ashley", options)
@@ -343,11 +358,11 @@ func TestCalledCampaignNotSatisfyingPresegmentation(t *testing.T) {
 	options := make(map[string]interface{})
 	options["customVariables"] = map[string]interface{}{"browser": "chrome"}
 
-	segmentFailed := make(map[string]interface{})
-	segmentFailed["or"] = map[string]interface{}{"custom_variable": {"chrome": "false"}}
+	segmentPassed := SegmentsHelper{}
+	segmentPassed.Or.CustomVariables.Browser = "chrome"
 
-	segmentPassed := make(map[string]interface{})
-	segmentPassed["or"] = map[string]interface{}{"custom_variable": {"browser": "chrome"}}
+	segmentFailed := SegmentsHelper{}
+	segmentFailed.Or.CustomVariables.Chrome = "false"
 
 	instance.SettingsFile.Campaigns[0].Segments = segmentFailed
 	instance.SettingsFile.Campaigns[1].Segments = segmentPassed
@@ -372,11 +387,11 @@ func TestOnlyCalledCampaignSatisfyPresegmentation(t *testing.T) {
 	options := make(map[string]interface{})
 	options["customVariables"] = map[string]interface{}{"browser": "chrome"}
 
-	segmentFailed := make(map[string]interface{})
-	segmentFailed["or"] = map[string]interface{}{"custom_variable": {"chrome": "false"}}
+	segmentPassed := SegmentsHelper{}
+	segmentPassed.Or.CustomVariables.Browser = "chrome"
 
-	segmentPassed := make(map[string]interface{})
-	segmentPassed["or"] = map[string]interface{}{"custom_variable": {"browser": "chrome"}}
+	segmentFailed := SegmentsHelper{}
+	segmentFailed.Or.CustomVariables.Chrome = "false"
 
 	instance.SettingsFile.Campaigns[0].Segments = segmentPassed
 	instance.SettingsFile.Campaigns[1].Segments = segmentFailed

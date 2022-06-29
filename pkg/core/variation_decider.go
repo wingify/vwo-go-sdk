@@ -436,7 +436,7 @@ func FindWinnerCampaign(userID string, eligibleCampaigns []schema.Campaign) sche
 	//Allocate new range for campaigns
 	eligibleCampaigns = addRangesToCampaigns(eligibleCampaigns)
 	//Now retrieve the campaign from the modified_campaign_for_whitelisting
-	_, bucketVal := GetBucketValueForUser(schema.VwoInstance{}, userID, constants.MaxTrafficValue, 1, schema.Campaign{})
+	_, bucketVal := GetBucketValueForUser(schema.VwoInstance{}, userID, constants.MaxTrafficPercent, 1, schema.Campaign{})
 	CampaignObtained, err := getCampaignUsingRange(bucketVal, eligibleCampaigns)
 	if err != nil {
 		return schema.Campaign{}
