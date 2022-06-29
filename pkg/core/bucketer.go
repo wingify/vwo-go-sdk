@@ -187,12 +187,11 @@ func getCampaignUsingRange(rangeForCampaigns int, campaigns []schema.Campaign) (
 			if ranges of the campaign are well within the bucket value --> correspoding campaign
 			else -->nil
 	*/
-	rangeForCampaigns = rangeForCampaigns * constants.MaxTrafficValue
+	rangeForCampaigns = rangeForCampaigns * constants.MaxTrafficPercent
 	for _, currentCampaign := range campaigns {
 		if currentCampaign.MaxRange != 0 && currentCampaign.MaxRange >= rangeForCampaigns && currentCampaign.MinRange <= rangeForCampaigns {
 			return currentCampaign, nil
 		}
 	}
-	return schema.Campaign{}, fmt.Errorf(constants.ErrorMessageNoCampaignIsInRange, rangeForCampaigns) //to add some error message
-	//fmt.Errorf(constants.ErrorMessageNoVariationForBucketValue, vwoInstance.API, userID, campaignKey, bucketValue)
+	return schema.Campaign{}, fmt.Errorf(constants.ErrorMessageNoCampaignIsInRange, rangeForCampaigns)
 }

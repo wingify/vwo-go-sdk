@@ -126,7 +126,7 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 			if isAnyCampaignWhitelistedOrStored {
 				message := fmt.Sprintf(constants.InfoMessageCampaignNotWinner, vwoInstance.API, campaign.Key, groupName, userID)
 				utils.LogMessage(vwoInstance.Logger, constants.Info, variationDecider, message)
-				return schema.Variation{}, "", nil
+				return schema.Variation{}, "", fmt.Errorf(constants.ErrorMessageOtherCampaignsSatisfiesStorage, vwoInstance.API, userID, campaign.Key)
 			}
 			eligibleCampaigns := GetEligibleCampaigns(userID, groupCampaigns, campaign, vwoInstance, campaign.Segments, options)
 			nonEligibleCampaignsKeys := GetNonEligibleCampaignsKey(eligibleCampaigns, groupCampaigns)
@@ -141,7 +141,7 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 			utils.LogMessage(vwoInstance.Logger, constants.Info, variationDecider, message)
 
 			winnerCampaign := FindWinnerCampaign(userID, eligibleCampaigns)
-			message = fmt.Sprintf(constants.InfoMessageObtainedWinnerCampaign, vwoInstance.API, campaign.Key, groupName, userID)
+			message = fmt.Sprintf(constants.InfoMessageObtainedWinnerCampaign, vwoInstance.API, winnerCampaign.Key, groupName, userID)
 			utils.LogMessage(vwoInstance.Logger, constants.Info, variationDecider, message)
 
 			if winnerCampaign.ID != 0 && winnerCampaign.ID == campaign.ID {
@@ -149,7 +149,7 @@ func GetVariation(vwoInstance schema.VwoInstance, userID string, campaign schema
 			} else {
 				message := fmt.Sprintf(constants.InfoMessageCampaignNotWinner, vwoInstance.API, campaign.Key, groupName, userID)
 				utils.LogMessage(vwoInstance.Logger, constants.Info, variationDecider, message)
-				return schema.Variation{}, "", nil
+				return schema.Variation{}, "", fmt.Errorf(constants.ErrorMessageNoVariationAllotedAsWinnerCampaignNotSame, vwoInstance.API, userID, campaign.Key)
 			}
 		}
 	}

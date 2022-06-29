@@ -97,7 +97,8 @@ const (
 	ErrorMessageBatchImpressionFailed                     = "Impression event could not be sent to VWO endpoint - %v. Status code: %v"
 	ErrorMessageBatchFlushError                           = "Error encountered in batch flush: %v"
 	ErrorMessageNoCampaignIsInRange                       = "No campaign is in range satisfying the threshold value of %v"
-
+	ErrorMessageOtherCampaignsSatisfiesStorage            = "[%v] Other campaigns satisfies the storage so no variation is alloted for the user: %v whose campaign key is : %v"
+	ErrorMessageNoVariationAllotedAsWinnerCampaignNotSame = "[%v] For the userID: %v of campaign key: %v no variation is alloted as winner campaign is not the same as our called campaign"
 	//Info Messages
 	InfoMessageFeatureEnabledForUser            = "[%v] Campaign: %v for user ID: %v is enabled"
 	InfoMessageFeatureNotEnabledForUser         = "[%v] Campaign: %v for user ID: %v is not enabled"
