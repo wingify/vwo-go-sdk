@@ -19,6 +19,7 @@ package core
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 
 	"github.com/spaolacci/murmur3"
@@ -167,6 +168,8 @@ func addRangesToCampaigns(campaigns []schema.Campaign) []schema.Campaign {
 			campaigns : array of type schema.Campaign after adding ranges for every Campaign in the array passed
 	*/
 	offset := 0
+	//sorting the campaigns in the order of ID's
+	sort.Slice(campaigns, func(i, j int) bool { return campaigns[i].ID < campaigns[j].ID })
 	for idx := range campaigns {
 		limit := int(math.Floor(campaigns[idx].Weight * constants.MaxTrafficValue / 100))
 		maxRange := offset + limit
