@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2022 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package schema
 
 import (
@@ -127,7 +126,11 @@ func (batch *BatchEventQueue) FlushBatch(vwoInstance VwoInstance) {
 	}()
 
 	headers := map[string]string{"Authorization": batch.SDKKey}
-	url := constants.HTTPSProtocol + constants.EndPointsBaseURL + constants.BatchEndPoint
+	UpdatedBaseURL := constants.BaseURL
+	if vwoInstance.SettingsFile.CollectionPrefix != "" {
+		UpdatedBaseURL = UpdatedBaseURL + "/" + vwoInstance.SettingsFile.CollectionPrefix
+	}
+	url := constants.HTTPSProtocol + UpdatedBaseURL + constants.BatchEndPoint
 	body := map[string]interface{}{"ev": batch.getBatchMinifiedPayload(batch.impressions)}
 	queryParams := map[string]string{
 		"a":   strconv.Itoa(batch.AccountID),
@@ -136,8 +139,8 @@ func (batch *BatchEventQueue) FlushBatch(vwoInstance VwoInstance) {
 		"env": batch.SDKKey,
 	}
 	for key, element := range GetUsageStatsObject(vwoInstance) {
-		queryParams[key]= element
-    }
+		queryParams[key] = element
+	}
 	log.Debug(fmt.Sprintf(constants.DebugBeforeBatchFlush, strconv.Itoa(len(batch.impressions)), strconv.Itoa(batch.AccountID)))
 	_, status, err := request.PostRequest(url, body, headers, queryParams)
 	log.Debug(fmt.Sprintf(constants.DebugAfterBatchFlush, strconv.Itoa(len(batch.impressions))))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2022 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@ package tests
 
 import (
 	"bytes"
+	"io/ioutil"
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-go-sdk/pkg/api"
 	"github.com/wingify/vwo-go-sdk/pkg/mocks"
@@ -25,10 +30,6 @@ import (
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/testdata"
 	"github.com/wingify/vwo-go-sdk/pkg/utils"
-	"io/ioutil"
-	"net/http"
-	"testing"
-	"time"
 )
 
 func init() {

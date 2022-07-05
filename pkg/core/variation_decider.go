@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2022 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +152,7 @@ func FindTargetedVariation(vwoInstance schema.VwoInstance, userID string, campai
 	} else {
 		whiteListedVariationsList = utils.ScaleVariations(whiteListedVariationsList)
 		whiteListedVariationsList = utils.GetVariationAllocationRanges(vwoInstance, whiteListedVariationsList)
-		_, bucketValue := GetBucketValueForUser(vwoInstance, userID, constants.MaxTrafficValue, 1)
+		_, bucketValue := GetBucketValueForUser(vwoInstance, userID, constants.MaxTrafficValue, 1, campaign)
 		var err error
 		targettedVariation, err = GetBucketerVariation(vwoInstance, whiteListedVariationsList, bucketValue, userID, campaign.Key)
 		if err != nil {

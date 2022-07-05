@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2022 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,15 @@ func GetUsageStatsObject(vwoInstance VwoInstance) ( usageStats map[string]string
 		usageStats["gt"] = "1"
 	}
 	usageStats["_l"] = "1"
-	return 
+	return
 }
 
 
-func GetUsageStatsImpression(vwoInstance VwoInstance) (usageStats string) {	
+func GetUsageStatsImpression(vwoInstance VwoInstance) (usageStats string) {
 	params := url.Values{}
 	for key, element := range GetUsageStatsObject(vwoInstance) {
 		params.Add(key, element)
     }
 	usageStats = "&"+params.Encode()
-	return 
+	return
 }

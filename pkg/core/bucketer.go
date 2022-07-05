@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2022 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ package core
 import (
 	"fmt"
 	"math"
+	"strconv"
 
+	"github.com/spaolacci/murmur3"
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/utils"
-	"github.com/spaolacci/murmur3"
 )
 
 const (
@@ -54,7 +55,8 @@ func GetBucketerVariation(vwoInstance schema.VwoInstance, variations []schema.Va
 }
 
 // GetBucketValueForUser returns Bucket Value of the user by hashing the userId with murmur hash and scaling it down.
-func GetBucketValueForUser(vwoInstance schema.VwoInstance, userID string, maxValue, multiplier float64) (uint32, int) {
+func GetBucketValueForUser(vwoInstance schema.VwoInstance, userID string, maxValue,
+	multiplier float64, campaign schema.Campaign) (uint32, int) {
 	/*
 		Args:
 			vwoInstance: vwo Instance for logger implementation
@@ -65,6 +67,10 @@ func GetBucketValueForUser(vwoInstance schema.VwoInstance, userID string, maxVal
 		Returns:
 			int: the bucket value allotted to User (between 1 to MAX_TRAFFIC_PERCENT)
 	*/
+	if campaign.IsBucketingSeedEnabled {
+		var campaignId = strconv.Itoa(campaign.ID) //to convert campaign Id to string to append to userId
+		userID = campaignId + "_" + userID
+	}
 
 	hashValue := hash(userID) & umax32Bit
 	ratio := float64(hashValue) / math.Pow(2, 32)
@@ -88,7 +94,7 @@ func IsUserPartOfCampaign(vwoInstance schema.VwoInstance, userID string, campaig
 	if len(campaign.Variations) == 0 {
 		return false
 	}
-	hashValue, valueAssignedToUser := GetBucketValueForUser(vwoInstance, userID, constants.MaxTrafficPercent, 1)
+	hashValue, valueAssignedToUser := GetBucketValueForUser(vwoInstance, userID, constants.MaxTrafficPercent, 1, campaign)
 
 	message := fmt.Sprintf(constants.DebugMessageUserHashBucketValue, vwoInstance.API, userID, hashValue, valueAssignedToUser)
 	utils.LogMessage(vwoInstance.Logger, constants.Debug, bucketer, message)
@@ -117,7 +123,7 @@ func BucketUserToVariation(vwoInstance schema.VwoInstance, userID string, campai
 		return schema.Variation{}, fmt.Errorf(constants.ErrorMessageNoVariationInCampaign, vwoInstance.API, campaign.Key)
 	}
 	multiplier := (float64(constants.MaxTrafficValue) / float64(campaign.PercentTraffic)) / 100
-	_, bucketValue := GetBucketValueForUser(vwoInstance, userID, constants.MaxTrafficValue, multiplier)
+	_, bucketValue := GetBucketValueForUser(vwoInstance, userID, constants.MaxTrafficValue, multiplier, campaign)
 
 	message := fmt.Sprintf(constants.DebugMessageVariationHashBucketValue, vwoInstance.API, userID, campaign.Key, campaign.PercentTraffic, bucketValue)
 	utils.LogMessage(vwoInstance.Logger, constants.Debug, bucketer, message)

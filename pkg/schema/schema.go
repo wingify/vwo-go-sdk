@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2022 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,25 @@ package schema
 
 // SettingsFile struct
 type SettingsFile struct {
-	SDKKey    string     `json:"sdkKey"`
-	Campaigns []Campaign `json:"campaigns"`
-	AccountID int        `json:"accountId"`
+	SDKKey           string     `json:"sdkKey"`
+	Campaigns        []Campaign `json:"campaigns"`
+	AccountID        int        `json:"accountId"`
+	CollectionPrefix string     `json:"collectionPrefix"`
 }
 
 // Campaign struct
 type Campaign struct {
-	ID                int                    `json:"id"`
-	Segments          map[string]interface{} `json:"segments"`
-	Status            string                 `json:"status"`
-	PercentTraffic    int                    `json:"percentTraffic"`
-	Goals             []Goal                 `json:"goals"`
-	Variations        []Variation            `json:"variations"`
-	Variables         []Variable             `json:"variables"`
-	IsForcedVariation bool                   `json:"isForcedVariationEnabled"`
-	Key               string                 `json:"key"`
-	Type              string                 `json:"type"`
+	ID                     int                    `json:"id"`
+	Segments               map[string]interface{} `json:"segments"`
+	Status                 string                 `json:"status"`
+	PercentTraffic         int                    `json:"percentTraffic"`
+	Goals                  []Goal                 `json:"goals"`
+	Variations             []Variation            `json:"variations"`
+	Variables              []Variable             `json:"variables"`
+	IsForcedVariation      bool                   `json:"isForcedVariationEnabled"`
+	Key                    string                 `json:"key"`
+	Type                   string                 `json:"type"`
+	IsBucketingSeedEnabled bool                   `json:"isBucketingSeedEnabled"`
 }
 
 // Goal struct
@@ -108,7 +110,7 @@ type Impression struct {
 	R            string  `json:"r"`
 	Tags         string  `json:"tags"`
 	EventType    string  `json:"eventType"`
-	UsageStats	 string  `json:"usageStats"`
+	UsageStats   string  `json:"usageStats"`
 }
 
 // TrackResult struct

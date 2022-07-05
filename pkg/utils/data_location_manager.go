@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package api
+package utils
 
 import (
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
+	"github.com/wingify/vwo-go-sdk/pkg/schema"
 )
 
-type BatchConfig struct {
-	RequestTimeInterval int
-	EventsPerRequest    int
-}
-
-func (config *BatchConfig) SetDefaults() {
-
-	config.EventsPerRequest = constants.BatchDefaultEventsPerRequest
-	config.RequestTimeInterval = constants.BatchDefaultRequestInterval
+func GetDataLocation(SettingsFile schema.SettingsFile) string {
+	CurrentBaseURL := constants.BaseURL
+	if SettingsFile.CollectionPrefix != "" {
+		CurrentBaseURL = CurrentBaseURL + "/" + SettingsFile.CollectionPrefix
+	}
+	return CurrentBaseURL
 }
