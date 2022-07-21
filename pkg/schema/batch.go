@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Wingify Software Pvt. Ltd.
+ * Copyright 2020-2022 Wingify Software Pvt. Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,12 +126,10 @@ func (batch *BatchEventQueue) FlushBatch(vwoInstance VwoInstance) {
 	}()
 
 	headers := map[string]string{"Authorization": batch.SDKKey}
-
 	UpdatedBaseURL := constants.BaseURL
 	if vwoInstance.SettingsFile.CollectionPrefix != "" {
 		UpdatedBaseURL = UpdatedBaseURL + "/" + vwoInstance.SettingsFile.CollectionPrefix
 	}
-
 	url := constants.HTTPSProtocol + UpdatedBaseURL + constants.BatchEndPoint
 	body := map[string]interface{}{"ev": batch.getBatchMinifiedPayload(batch.impressions)}
 	queryParams := map[string]string{
