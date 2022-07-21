@@ -253,6 +253,7 @@ func TestGetVariationFromUserStorage(t *testing.T) {
 // functions for testing Mutually Exclusive Groups
 
 // function CheckIfKeyExists checks whether key is actually present in the array or not
+/*
 func CheckIfKeyExists(TrackResult []schema.TrackResult, key string) bool {
 	for _, currentTrackResult := range TrackResult {
 		if currentTrackResult.CampaignKey == key {
@@ -599,4 +600,5 @@ func TestWhenViewedCampaignRemovedFromGroup(t *testing.T) {
       // since user has already seen that campaign, they will continue to become part of that campaign
       $variation = $vwoInstance->activate($campaignKey, 'Ashley');
       $this->assertEquals($variation, 'Control');
-  }*/
+  }
+*/

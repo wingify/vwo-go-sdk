@@ -128,7 +128,7 @@ func TestGetBucketValueForUser(t *testing.T) {
 	}
 }
 
-func GetBucketValueForUser1(t *testing.T) {
+/*func GetBucketValueForUser1(t *testing.T) {
 	var campaign schema.Campaign
 	var vwoInstance schema.VwoInstance
 	campaign.ID = 1
@@ -158,7 +158,7 @@ func GetBucketValueForUser1111111111111111(t *testing.T) {
 	ExpectedBucketVal = 4987
 	_, CalculatedVal = GetBucketValueForUser(vwoInstance, userID, 10000, 1, campaign)
 	assert.Equal(t, ExpectedBucketVal, CalculatedVal, "Failed when userID is "+userID+" and bucketing seed is false")
-}
+}*/
 
 func TestHash(t *testing.T) {
 	actual := hash(testdata.GetRandomUser())
