@@ -139,6 +139,10 @@ func FindTargetedVariation(vwoInstance schema.VwoInstance, userID string, campai
 			error: Error message
 	*/
 
+  if campaign.IsUserListEnabled {
+    options.VariationTargetingVariables["_vwo_user_id"] = utils.GenerateFor(vwoInstance, userID, vwoInstance.SettingsFile.AccountID)
+  }
+
 	if campaign.IsForcedVariation == false {
 		return schema.Variation{}, fmt.Errorf(constants.InfoMessageWhitelistingSkipped, vwoInstance.API, userID, campaign.Key)
 	}

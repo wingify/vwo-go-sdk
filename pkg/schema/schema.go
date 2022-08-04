@@ -21,7 +21,7 @@ type SettingsFile struct {
 	SDKKey           string     `json:"sdkKey"`
 	Campaigns        []Campaign `json:"campaigns"`
 	AccountID        int        `json:"accountId"`
-	CollectionPrefix string     `json:"collectionPrefix"`
+	CollectionPrefix  string     `json:"collectionPrefix"`
 }
 
 // Campaign struct
@@ -29,7 +29,7 @@ type Campaign struct {
 	ID                     int                    `json:"id"`
 	Segments               map[string]interface{} `json:"segments"`
 	Status                 string                 `json:"status"`
-	PercentTraffic         int                    `json:"percentTraffic"`
+	PercentTraffic          int                    `json:"percentTraffic"`
 	Goals                  []Goal                 `json:"goals"`
 	Variations             []Variation            `json:"variations"`
 	Variables              []Variable             `json:"variables"`
@@ -37,6 +37,7 @@ type Campaign struct {
 	Key                    string                 `json:"key"`
 	Type                   string                 `json:"type"`
 	IsBucketingSeedEnabled bool                   `json:"isBucketingSeedEnabled"`
+  IsUserListEnabled      bool                   `json:"isUserListEnabled"`
 }
 
 // Goal struct
@@ -96,7 +97,7 @@ type VariationAllocationRange struct {
 type Impression struct {
 	AccountID    int     `json:"account_id"`
 	UID          string  `json:"uId"`
-	Random       float32 `json:"random"`
+	Random       float32  `json:"random"`
 	SID          string  `json:"sId"`
 	U            string  `json:"u"`
 	Sdk          string  `json:"sdk"`

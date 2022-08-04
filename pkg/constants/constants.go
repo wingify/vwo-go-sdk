@@ -21,7 +21,7 @@ const (
 	MaxTrafficPercent = 100
 	MaxTrafficValue   = 10000
 	StatusRunning     = "RUNNING"
-	SDKVersion        = "1.23.0"
+	SDKVersion        = "1.24.0"
 	SDKName           = "vwo-go-sdk"
 	Platform          = "server"
 	SeedValue         = 1
