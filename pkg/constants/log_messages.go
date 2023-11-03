@@ -44,7 +44,7 @@ const (
 	DebugMessageInvalidRequestTimeInterval      = "requestTimeInterval hould be > %v and <= %v. Assigning it the default value i.e %v seconds"
 	DebugMessageInvalidEventsPerRequest         = "eventsPerRequest should be >= %v and <= %v. Assigning it the default value i.e %v"
 	/*Extras*/
-	DebugMessageCustomLoggerFound     = "[%v] Custom logger found"
+	DebugMessageCustomLoggerFound     = "Custom logger found"
 	DebugMessageNoSegmentsInVariation = "[%v] For User ID: %v of Campaign: %v, segment was missing, hence skipping segmentation %v "
 	DebugMessageSettingsFileProcessed = "[%v] Settings file processed"
 	DebugMessageValidConfiguration    = "[%v] SDK configuration and account settings are valid"

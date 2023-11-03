@@ -195,7 +195,7 @@ func SetLogLevel(lvl int) {
 }
 
 // GetLogLevel function gets log level for logging
-func GetLogLevel() (lvl int){
+func GetLogLevel() (lvl int) {
 	lvl = logLevel
 	return
 }

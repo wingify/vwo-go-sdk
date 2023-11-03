@@ -17,22 +17,23 @@
 package logger
 
 import (
-	"log/syslog"
+	"log"
+	"os"
 )
 
-func setup(src string) (*syslog.Writer, *syslog.Writer, *syslog.Writer, error) {
-	const facility = syslog.LOG_USER
-	il, err := syslog.New(facility|syslog.LOG_NOTICE, src)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	wl, err := syslog.New(facility|syslog.LOG_WARNING, src)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	el, err := syslog.New(facility|syslog.LOG_ERR, src)
-	if err != nil {
-		return nil, nil, nil, err
-	}
+type LoggerWriter struct {
+	*log.Logger
+}
+
+func (lw *LoggerWriter) Write(p []byte) (n int, err error) {
+	lw.Print(string(p))
+	return len(p), nil
+}
+
+func setup(src string) (*LoggerWriter, *LoggerWriter, *LoggerWriter, error) {
+	il := &LoggerWriter{log.New(os.Stdout, src+" [INFO] ", log.LstdFlags)}
+	wl := &LoggerWriter{log.New(os.Stdout, src+" [WARNING] ", log.LstdFlags)}
+	el := &LoggerWriter{log.New(os.Stderr, src+" [ERROR] ", log.LstdFlags)}
+
 	return il, wl, el, nil
 }
