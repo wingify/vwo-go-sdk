@@ -18,16 +18,16 @@ package core
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/testdata"
 	"github.com/wingify/vwo-go-sdk/pkg/utils"
-	"github.com/stretchr/testify/assert"
 )
 
 type TestCase struct {
@@ -97,7 +97,7 @@ func TestGetVariation(t *testing.T) {
 	assertOutput := assert.New(t)
 
 	var userExpectation map[string][]TestCase
-	data, err := ioutil.ReadFile("../testdata/user_expectations1.json")
+	data, err := io.ReadFile("../testdata/user_expectations1.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -107,7 +107,7 @@ func TestGetVariation(t *testing.T) {
 	}
 
 	var settingsFiles map[string]schema.SettingsFile
-	data, err = ioutil.ReadFile("../testdata/settings.json")
+	data, err = io.ReadFile("../testdata/settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -116,7 +116,7 @@ func TestGetVariation(t *testing.T) {
 		logger.Info("Error: " + err.Error())
 	}
 
-	logs := logger.Init(constants.SDKName, true, false, ioutil.Discard)
+	logs := logger.Init(constants.SDKName, true, false, io.Discard)
 	logger.SetFlags(log.LstdFlags)
 	defer logger.Close()
 
@@ -147,7 +147,7 @@ func TestGetVariation(t *testing.T) {
 	// CORNER CASES
 
 	var customSettingsFiles map[string]schema.SettingsFile
-	data, err = ioutil.ReadFile("../testdata/custom_settings.json")
+	data, err = io.ReadFile("../testdata/custom_settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}

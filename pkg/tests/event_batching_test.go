@@ -18,7 +18,7 @@ package tests
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -35,7 +35,7 @@ import (
 func init() {
 	request.Client = mocks.MockClient{
 		DoFunc: func(*http.Request) (*http.Response, error) {
-			return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(""))}, nil
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(""))}, nil
 		},
 	}
 }

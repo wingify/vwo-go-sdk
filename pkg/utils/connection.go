@@ -18,7 +18,7 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
@@ -39,7 +39,7 @@ func GetRequest(url string) (string, error) {
 		return "", fmt.Errorf(constants.ErrorMessageURLNotFound, "", err.Error())
 	}
 	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", fmt.Errorf(constants.ErrorMessageResponseNotParsed, "", url)
 	}

@@ -18,24 +18,24 @@ package api
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/core"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/testdata"
 	"github.com/wingify/vwo-go-sdk/pkg/utils"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestIsFeatureEnabled(t *testing.T) {
 	assertOutput := assert.New(t)
 
 	var settingsFiles map[string]schema.SettingsFile
-	data, err := ioutil.ReadFile("../testdata/settings.json")
+	data, err := io.ReadFile("../testdata/settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -44,7 +44,7 @@ func TestIsFeatureEnabled(t *testing.T) {
 		logger.Info("Error: " + err.Error())
 	}
 
-	logs := logger.Init(constants.SDKName, true, false, ioutil.Discard)
+	logs := logger.Init(constants.SDKName, true, false, io.Discard)
 	logger.SetFlags(log.LstdFlags)
 	defer logger.Close()
 
@@ -110,10 +110,10 @@ func TestIsFeatureEnabled(t *testing.T) {
 
 					assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
 					assertOutput.Nil(err, "Error encuntered")
-					assertOutput.False(actual, "Feature Test Campaign : " + variation.Name + userID)
+					assertOutput.False(actual, "Feature Test Campaign : "+variation.Name+userID)
 				} else {
 					actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[0].Key, userID, nil)
-					assertOutput.True(actual, "Feature Test Campaign : " + variation.Name + userID)
+					assertOutput.True(actual, "Feature Test Campaign : "+variation.Name+userID)
 				}
 			}
 		} else if instance.SettingsFile.Campaigns[0].Type == constants.CampaignTypeFeatureTest && settingsFileName == "FT_T_100_W_10_20_30_40_IFEF" {
@@ -124,13 +124,13 @@ func TestIsFeatureEnabled(t *testing.T) {
 
 					assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
 					assertOutput.Nil(err, "Error encuntered")
-					assertOutput.True(actual, "Feature Test Campaign : " + variation.Name + userID)
+					assertOutput.True(actual, "Feature Test Campaign : "+variation.Name+userID)
 				} else {
 					actual := instance.IsFeatureEnabled(instance.SettingsFile.Campaigns[0].Key, userID, nil)
 
 					assertOutput.Empty(storedGoalIdentifiers, "Incorrect Assertion for storedGoalIdentifiers ")
 					assertOutput.Nil(err, "Error encuntered")
-					assertOutput.False(actual, "Feature Test Campaign : " + variation.Name + userID)
+					assertOutput.False(actual, "Feature Test Campaign : "+variation.Name+userID)
 				}
 			}
 		}
@@ -145,7 +145,7 @@ func TestIsFeatureEnabled(t *testing.T) {
 	assertOutput.False(value, "Control Variation")
 
 	var customSettingsFiles map[string]schema.SettingsFile
-	data, err = ioutil.ReadFile("../testdata/custom_settings.json")
+	data, err = io.ReadFile("../testdata/custom_settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}

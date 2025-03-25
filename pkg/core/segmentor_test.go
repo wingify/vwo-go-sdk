@@ -18,12 +18,12 @@ package core
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/testdata"
-	"github.com/stretchr/testify/assert"
 )
 
 type SegmentorTestCase struct {
@@ -35,7 +35,7 @@ type SegmentorTestCase struct {
 
 func TestSegmentEvaluator(t *testing.T) {
 	var TestData map[string]map[string]SegmentorTestCase
-	data, err := ioutil.ReadFile("../testdata/test_segment.json")
+	data, err := io.ReadFile("../testdata/test_segment.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}

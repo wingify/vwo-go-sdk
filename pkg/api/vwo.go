@@ -18,7 +18,7 @@ package api
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
@@ -53,7 +53,7 @@ func (vwo VWOInstance) Init(vwoOption ...VWOOption) (*VWOInstance, error) {
 	}
 
 	if vwo.Logger == nil {
-		logs := logger.Init(constants.SDKName, true, false, ioutil.Discard)
+		logs := logger.Init(constants.SDKName, true, false, io.Discard)
 		logger.SetFlags(log.LstdFlags)
 		message := fmt.Sprintf(constants.DebugMessageNoCustomLoggerFound)
 		utils.LogMessage(logs, constants.Debug, fileVWO, message)

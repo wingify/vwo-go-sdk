@@ -18,23 +18,23 @@ package api
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"testing"
 
-	"github.com/wingify/vwo-go-sdk/pkg/testdata"
+	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
+	"github.com/wingify/vwo-go-sdk/pkg/testdata"
 	"github.com/wingify/vwo-go-sdk/pkg/utils"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestTrack(t *testing.T) {
 	assertOutput := assert.New(t)
 
 	var userExpectation map[string][]TestCase
-	data, err := ioutil.ReadFile("../testdata/user_expectations1.json")
+	data, err := io.ReadFile("../testdata/user_expectations1.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -44,7 +44,7 @@ func TestTrack(t *testing.T) {
 	}
 
 	var settingsFiles map[string]schema.SettingsFile
-	data, err = ioutil.ReadFile("../testdata/settings.json")
+	data, err = io.ReadFile("../testdata/settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -53,7 +53,7 @@ func TestTrack(t *testing.T) {
 		logger.Info("Error: " + err.Error())
 	}
 
-	logs := logger.Init(constants.SDKName, true, false, ioutil.Discard)
+	logs := logger.Init(constants.SDKName, true, false, io.Discard)
 	logger.SetFlags(log.LstdFlags)
 	defer logger.Close()
 
@@ -77,19 +77,19 @@ func TestTrack(t *testing.T) {
 			for i := range testCases {
 				if testCases[i].Variation != "" {
 					actual := instance.Track(settingsFile.Campaigns[0].Key, testCases[i].User, settingsFile.Campaigns[0].Goals[0].Identifier, options)
-					expected := []schema.TrackResult {
+					expected := []schema.TrackResult{
 						{
 							CampaignKey: settingsFile.Campaigns[0].Key,
-							TrackValue: true,
+							TrackValue:  true,
 						},
 					}
 					assertOutput.Equal(expected, actual, settingsFileName+" "+testCases[i].User)
 				} else {
 					actual := instance.Track(settingsFile.Campaigns[0].Key, testCases[i].User, settingsFile.Campaigns[0].Goals[0].Identifier, options)
-					expected := []schema.TrackResult {
+					expected := []schema.TrackResult{
 						{
 							CampaignKey: settingsFile.Campaigns[0].Key,
-							TrackValue: false,
+							TrackValue:  false,
 						},
 					}
 					assertOutput.Equal(expected, actual, settingsFileName+" "+testCases[i].User)
@@ -100,19 +100,19 @@ func TestTrack(t *testing.T) {
 			for i := range testCases {
 				if testCases[i].Variation != "" {
 					actual := instance.Track(settingsFile.Campaigns[0].Key, testCases[i].User, settingsFile.Campaigns[0].Goals[0].Identifier, options)
-					expected := []schema.TrackResult {
+					expected := []schema.TrackResult{
 						{
 							CampaignKey: settingsFile.Campaigns[0].Key,
-							TrackValue: true,
+							TrackValue:  true,
 						},
 					}
 					assertOutput.Equal(expected, actual, settingsFileName+" "+testCases[i].User)
 				} else {
 					actual := instance.Track(settingsFile.Campaigns[0].Key, testCases[i].User, settingsFile.Campaigns[0].Goals[0].Identifier, options)
-					expected := []schema.TrackResult {
+					expected := []schema.TrackResult{
 						{
 							CampaignKey: settingsFile.Campaigns[0].Key,
-							TrackValue: false,
+							TrackValue:  false,
 						},
 					}
 					assertOutput.Equal(expected, actual, settingsFileName+" "+testCases[i].User)
@@ -125,7 +125,7 @@ func TestTrack(t *testing.T) {
 	// CORNER CASES
 
 	var customSettingsFiles map[string]schema.SettingsFile
-	data, err = ioutil.ReadFile("../testdata/custom_settings.json")
+	data, err = io.ReadFile("../testdata/custom_settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -141,24 +141,24 @@ func TestTrack(t *testing.T) {
 	campaignKey := ""
 	goalIdentifier := ""
 	value := instance.Track(campaignKey, userID, goalIdentifier, nil)
-	expected := []schema.TrackResult {}
+	expected := []schema.TrackResult{}
 	assertOutput.Equal(expected, value, "Invalid params")
 
 	userID = testdata.GetRandomUser()
 	campaignKey = testdata.NonExistingCampaign
 	goalIdentifier = "GOAL_0"
 	value = instance.Track(campaignKey, userID, goalIdentifier, nil)
-	expected = []schema.TrackResult {}
+	expected = []schema.TrackResult{}
 	assertOutput.Equal(expected, value, "Campaign does not exist")
 
 	userID = testdata.GetRandomUser()
 	campaignKey = testdata.NotRunningCampaign
 	goalIdentifier = "GOAL_0"
 	value = instance.Track(campaignKey, userID, goalIdentifier, nil)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: false,
+			TrackValue:  false,
 		},
 	}
 	assertOutput.Equal(expected, value, "Campaign Not running")
@@ -167,10 +167,10 @@ func TestTrack(t *testing.T) {
 	campaignKey = testdata.FeatureRolloutCampaign
 	goalIdentifier = "GOAL_0"
 	value = instance.Track(campaignKey, userID, goalIdentifier, nil)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: false,
+			TrackValue:  false,
 		},
 	}
 	assertOutput.Equal(expected, value, "Campaign Not Valid")
@@ -179,10 +179,10 @@ func TestTrack(t *testing.T) {
 	campaignKey = "CAMPAIGN_3"
 	goalIdentifier = "GOAL_0"
 	value = instance.Track(campaignKey, userID, goalIdentifier, nil)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: false,
+			TrackValue:  false,
 		},
 	}
 	assertOutput.Equal(expected, value, "Goal Not Found")
@@ -191,10 +191,10 @@ func TestTrack(t *testing.T) {
 	campaignKey = "CAMPAIGN_3"
 	goalIdentifier = "abcd"
 	value = instance.Track(campaignKey, userID, goalIdentifier, nil)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: false,
+			TrackValue:  false,
 		},
 	}
 	assertOutput.Equal(expected, value, "Revenue Not defined")
@@ -210,10 +210,10 @@ func TestTrack(t *testing.T) {
 	testOptions["goalTypeToTrack"] = constants.GoalTypeCustom
 	testOptions["shouldTrackReturningUser"] = true
 	value = instance.Track(campaignKey, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: true,
+			TrackValue:  true,
 		},
 	}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
@@ -225,10 +225,10 @@ func TestTrack(t *testing.T) {
 	instance.ShouldTrackReturningUser = true
 	testOptions["shouldTrackReturningUser"] = true
 	value = instance.Track(campaignKey1, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: "AB_T_100_W_33_33_33",
-			TrackValue: true,
+			TrackValue:  true,
 		},
 	}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
@@ -240,7 +240,7 @@ func TestTrack(t *testing.T) {
 	instance.ShouldTrackReturningUser = true
 	testOptions["shouldTrackReturningUser"] = true
 	value = instance.Track(campaignKey1, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {}
+	expected = []schema.TrackResult{}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
 
 	userID = testdata.GetRandomUser()
@@ -249,10 +249,10 @@ func TestTrack(t *testing.T) {
 	instance.ShouldTrackReturningUser = true
 	testOptions["shouldTrackReturningUser"] = true
 	value = instance.Track(nil, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: "AB_T_100_W_33_33_33",
-			TrackValue: true,
+			TrackValue:  true,
 		},
 	}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
@@ -264,7 +264,7 @@ func TestTrack(t *testing.T) {
 	instance.ShouldTrackReturningUser = true
 	testOptions["shouldTrackReturningUser"] = true
 	value = instance.Track(nil, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {}
+	expected = []schema.TrackResult{}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
 
 	userID = testdata.GetRandomUser()
@@ -275,10 +275,10 @@ func TestTrack(t *testing.T) {
 	instance.ShouldTrackReturningUser = true
 	testOptions["shouldTrackReturningUser"] = true
 	value = instance.Track(campaignKey, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: "AB_T_100_W_33_33_33",
-			TrackValue: false,
+			TrackValue:  false,
 		},
 	}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
@@ -292,50 +292,50 @@ func TestTrack(t *testing.T) {
 	userID = "DummyUser"
 	campaignKey = "AB_T_100_W_33_33_33"
 	testOptions["goalTypeToTrack"] = constants.GoalTypeAll
-	testOptions["shouldTrackReturningUser"] =  true
+	testOptions["shouldTrackReturningUser"] = true
 	value = instance.Track(campaignKey, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: true,
+			TrackValue:  true,
 		},
 	}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
 
 	testOptions["goalTypeToTrack"] = constants.GoalTypeAll
-	testOptions["shouldTrackReturningUser"] =  false
+	testOptions["shouldTrackReturningUser"] = false
 	instance.ShouldTrackReturningUser = false
 	value = instance.Track(campaignKey, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: false,
+			TrackValue:  false,
 		},
 	}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
 
 	userID = "TempUser"
 	testOptions["goalTypeToTrack"] = constants.GoalTypeAll
-	testOptions["shouldTrackReturningUser"] =  false
+	testOptions["shouldTrackReturningUser"] = false
 	instance.ShouldTrackReturningUser = false
 	value = instance.Track(campaignKey, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: true,
+			TrackValue:  true,
 		},
 	}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
 
 	instance.UserStorage = nil
 	testOptions["goalTypeToTrack"] = constants.GoalTypeAll
-	testOptions["shouldTrackReturningUser"] =  false
+	testOptions["shouldTrackReturningUser"] = false
 	instance.ShouldTrackReturningUser = false
 	value = instance.Track(campaignKey, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: true,
+			TrackValue:  true,
 		},
 	}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")
@@ -347,13 +347,13 @@ func TestTrack(t *testing.T) {
 	instance.SettingsFile.Campaigns[0].Variations = utils.GetVariationAllocationRanges(vwoInstance, instance.SettingsFile.Campaigns[0].Variations)
 
 	testOptions["goalTypeToTrack"] = constants.GoalTypeAll
-	testOptions["shouldTrackReturningUser"] =  false
+	testOptions["shouldTrackReturningUser"] = false
 	instance.ShouldTrackReturningUser = false
 	value = instance.Track(campaignKey, userID, goalIdentifier, testOptions)
-	expected = []schema.TrackResult {
+	expected = []schema.TrackResult{
 		{
 			CampaignKey: campaignKey,
-			TrackValue: true,
+			TrackValue:  true,
 		},
 	}
 	assertOutput.Equal(expected, value, "Incorrect Track Result Value")

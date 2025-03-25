@@ -19,7 +19,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/rand"
 	"strconv"
@@ -38,12 +38,12 @@ type SettingsFileManager struct {
 // FetchSettingsFile function makes call to VWO server to fetch the settings file
 func (sfm *SettingsFileManager) FetchSettingsFile(accountID, SDKKey string, isViaWebHook bool) error {
 	/*
-			Args:
-				accountID: Config account ID
-				SDKKey: Config SDK Key
-	      isViaWebHook: specifies if the fetch operation is triggered by a webhook
-			Returns:
-				error: nil if the settings file id fetched else the error
+				Args:
+					accountID: Config account ID
+					SDKKey: Config SDK Key
+		      isViaWebHook: specifies if the fetch operation is triggered by a webhook
+				Returns:
+					error: nil if the settings file id fetched else the error
 	*/
 
 	if accountID == "" {
@@ -73,7 +73,7 @@ func (sfm *SettingsFileManager) FetchSettingsFile(accountID, SDKKey string, isVi
 	if err != nil {
 		return fmt.Errorf(constants.ErrorMessageSettingsFileCorrupted, "", err.Error())
 	}
-  resp = utils.JsonCleanUp(resp)
+	resp = utils.JsonCleanUp(resp)
 	if err = json.Unmarshal([]byte(resp), &sfm.SettingsFile); err != nil {
 		return fmt.Errorf(constants.ErrorMessageInvalidSettingsFile, "", err.Error())
 	}
@@ -92,7 +92,7 @@ func (sfm *SettingsFileManager) ProcessSettingsFile(settingsFileLocation string)
 			error: nil if the settings file id fetched else the error
 	*/
 
-	settingsFile, err := ioutil.ReadFile(settingsFileLocation)
+	settingsFile, err := io.ReadFile(settingsFileLocation)
 	if err != nil {
 		return fmt.Errorf(constants.ErrorMessageCannotReadSettingsFile, "", err.Error())
 	}
@@ -104,9 +104,9 @@ func (sfm *SettingsFileManager) ProcessSettingsFile(settingsFileLocation string)
 	return nil
 }
 
-//Process function processes campaigns in the settings file and sets the variation allocation ranges to all variations
+// Process function processes campaigns in the settings file and sets the variation allocation ranges to all variations
 func (sfm *SettingsFileManager) Process() {
-	logs := logger.Init(constants.SDKName, true, false, ioutil.Discard)
+	logs := logger.Init(constants.SDKName, true, false, io.Discard)
 	logger.SetFlags(log.LstdFlags)
 	defer logger.Close()
 	for i, campaign := range sfm.SettingsFile.Campaigns {

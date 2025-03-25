@@ -17,13 +17,13 @@
 package utils
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
-	"github.com/stretchr/testify/assert"
 )
 
 type CLog interface {
@@ -41,7 +41,7 @@ type WLogS struct{}
 func (w *WLogS) CustomLogger(a, b string) {}
 
 func TestValidateLogger(t *testing.T) {
-	logs := logger.Init(constants.SDKName, true, false, ioutil.Discard)
+	logs := logger.Init(constants.SDKName, true, false, io.Discard)
 	actual := ValidateLogger(logs)
 	assert.True(t, actual, "google logger not validated")
 

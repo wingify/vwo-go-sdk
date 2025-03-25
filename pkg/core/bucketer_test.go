@@ -18,7 +18,7 @@ package core
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"testing"
 
@@ -102,7 +102,7 @@ func TestIsUserPartOfCampaign(t *testing.T) {
 
 func TestGetBucketValueForUser(t *testing.T) {
 	var settings map[string][]BucketTestCase
-	data, err := ioutil.ReadFile("../testdata/bucket_value_expectations.json")
+	data, err := io.ReadFile("../testdata/bucket_value_expectations.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -113,7 +113,7 @@ func TestGetBucketValueForUser(t *testing.T) {
 
 	TestCases := settings["USER_AND_BUCKET_VALUES"]
 
-	logs := logger.Init(constants.SDKName, true, false, ioutil.Discard)
+	logs := logger.Init(constants.SDKName, true, false, io.Discard)
 	logger.SetFlags(log.LstdFlags)
 	defer logger.Close()
 

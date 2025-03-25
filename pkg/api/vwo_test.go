@@ -17,15 +17,15 @@
 package api
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
 	"github.com/wingify/vwo-go-sdk/pkg/schema"
 	"github.com/wingify/vwo-go-sdk/pkg/service"
-	"github.com/stretchr/testify/assert"
 )
 
 // GetInstance function creates and return a temporary VWO instance for testing
@@ -65,7 +65,7 @@ func TestInit(t *testing.T) {
 	_, err = vwoInstance.Init(WithStorage(storage), WithGoalAttributes(nil, false))
 	assert.NotNil(t, err)
 
-	logs := logger.Init(constants.SDKName, true, false, ioutil.Discard)
+	logs := logger.Init(constants.SDKName, true, false, io.Discard)
 	logger.SetFlags(log.LstdFlags)
 	defer logger.Close()
 

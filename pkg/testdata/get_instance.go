@@ -19,7 +19,7 @@ package testdata
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"github.com/wingify/vwo-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-go-sdk/pkg/logger"
@@ -125,13 +125,13 @@ func (us *UserStorageData) Set(userID, campaignKey, variationName, GoalIdentifie
 func (us *UserStorageData) IncorrectSet(campaignKey, variationName string) {
 }
 
-//GetInstanceWithIncorrectStorage function
+// GetInstanceWithIncorrectStorage function
 func GetInstanceWithIncorrectStorage(SettingsFileName string) schema.VwoInstance {
-	logger := logger.Init(constants.SDKName, false, false, ioutil.Discard)
+	logger := logger.Init(constants.SDKName, false, false, io.Discard)
 	defer logger.Close()
 
 	var settingsFiles map[string]schema.SettingsFile
-	data, err := ioutil.ReadFile("../testdata/settings.json")
+	data, err := io.ReadFile("../testdata/settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -153,13 +153,13 @@ func GetInstanceWithIncorrectStorage(SettingsFileName string) schema.VwoInstance
 	return vwoInstance
 }
 
-//GetInstanceWithStorage function
+// GetInstanceWithStorage function
 func GetInstanceWithStorage(SettingsFileName string) schema.VwoInstance {
-	logger := logger.Init(constants.SDKName, false, false, ioutil.Discard)
+	logger := logger.Init(constants.SDKName, false, false, io.Discard)
 	defer logger.Close()
 
 	var settingsFiles map[string]schema.SettingsFile
-	data, err := ioutil.ReadFile("../testdata/settings.json")
+	data, err := io.ReadFile("../testdata/settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -181,13 +181,13 @@ func GetInstanceWithStorage(SettingsFileName string) schema.VwoInstance {
 	return vwoInstance
 }
 
-//GetInstanceWithCustomSettings function
+// GetInstanceWithCustomSettings function
 func GetInstanceWithCustomSettings(SettingsFileName string) schema.VwoInstance {
-	logger := logger.Init(constants.SDKName, false, false, ioutil.Discard)
+	logger := logger.Init(constants.SDKName, false, false, io.Discard)
 	defer logger.Close()
 
 	var settingsFiles map[string]schema.SettingsFile
-	data, err := ioutil.ReadFile("../testdata/custom_settings.json")
+	data, err := io.ReadFile("../testdata/custom_settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}
@@ -207,13 +207,13 @@ func GetInstanceWithCustomSettings(SettingsFileName string) schema.VwoInstance {
 	return vwoInstance
 }
 
-//GetInstanceWithSettings function
+// GetInstanceWithSettings function
 func GetInstanceWithSettings(SettingsFileName string) schema.VwoInstance {
-	logger := logger.Init(constants.SDKName, false, false, ioutil.Discard)
+	logger := logger.Init(constants.SDKName, false, false, io.Discard)
 	defer logger.Close()
 
 	var settingsFiles map[string]schema.SettingsFile
-	data, err := ioutil.ReadFile("../testdata/settings.json")
+	data, err := io.ReadFile("../testdata/settings.json")
 	if err != nil {
 		logger.Info("Error: " + err.Error())
 	}

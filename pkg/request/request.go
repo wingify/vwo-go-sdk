@@ -19,10 +19,11 @@ package request
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/wingify/vwo-go-sdk/pkg/constants"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/wingify/vwo-go-sdk/pkg/constants"
 )
 
 type HTTPClient interface {
@@ -54,7 +55,7 @@ func PostRequest(uri string, body interface{}, headers map[string]string, queryP
 	response, err := Client.Do(req)
 	defer response.Body.Close()
 	if err == nil {
-		responseBody, err := ioutil.ReadAll(response.Body)
+		responseBody, err := io.ReadAll(response.Body)
 		return responseBody, response.StatusCode, err
 	}
 	return nil, response.StatusCode, err
