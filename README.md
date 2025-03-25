@@ -1,7 +1,24 @@
-# VWO GO SDK
+# ⚠️ [DEPRECATED] VWO GO SDK
+
+**⚠️ This project is no longer actively developed. ⚠️**
+
+**✅ We are only fixing critical bugs and security issues.**
+
+**❌ No new features, enhancements, or non-critical updates will be added.**
+
+#### Switch to *VWO Feature Management & Experimentation(FME)* – The Better Alternative! 🚀
+
+VWO’s FME product empowers teams to seamlessly test, release, optimize, and roll back features across their entire tech stack while minimizing risk and maximizing business impact.
+
+* Check out FME developer documentation [here](https://developers.vwo.com/v2/docs/fme-overview).
+* Check [this](https://developers.vwo.com/v2/docs/sdks-release-info ) for the list of all FME-supported SDKs.
+
+**💡 Need Help?**
+For migration assistance or any questions, contact us at [support@vwo.com](support@vwo.com)
+
+------
 
 [![CI](https://github.com/wingify/vwo-go-sdk/workflows/CI/badge.svg?branch=master)](https://github.com/wingify/vwo-go-sdk/actions?query=workflow%3ACI)
-
 ![Size in Bytes](https://img.shields.io/github/languages/code-size/wingify/vwo-go-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![codecov](https://codecov.io/gh/wingify/vwo-go-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/wingify/vwo-go-sdk)
